@@ -1,6 +1,6 @@
 CREATE TABLE currencies (
-  id                smallserial         PRIMARY KEY,
-  currency_code     varchar(10)         NOT NULL
+  id              smallint  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  currency_code   text      NOT NULL
 );
 
 INSERT INTO currencies (
