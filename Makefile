@@ -18,3 +18,6 @@ migratedown:
 
 migratedown1:
 	migrate -database $(POSTGRES_URL) -path database/migrations down 1
+
+sqlc:
+	sqlc generate

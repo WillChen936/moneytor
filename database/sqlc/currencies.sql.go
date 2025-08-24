@@ -3,7 +3,7 @@
 //   sqlc v1.29.0
 // source: currencies.sql
 
-package moneytor
+package db
 
 import (
 	"context"

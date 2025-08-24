@@ -5,6 +5,6 @@ sql:
     schema: "database/migrations"
     gen:
       go:
-        package: "moneytor"
+        package: "db"
         out: "database/sqlc"
         sql_package: "pgx/v5"
