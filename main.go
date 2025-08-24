@@ -1,24 +1,24 @@
 package main
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
-	conn, err := pgx.Connect(context.Background(), "postgres://root:pass.123@localhost:5432/moneytor")
+	connPool, err := sql.Open("pgx", "postgres://root:pass.123@localhost:5432/moneytor")
 	if err != nil {
 		fmt.Printf("Unable to connect to database: %v", err)
 		os.Exit(1)
 	}
-	defer conn.Close(context.Background())
+	defer connPool.Close()
 
 	var id int
 	var code string
-	err = conn.QueryRow(context.Background(), "SELECT * FROM currencies WHERE id=$1", 10).Scan(&id, &code)
+	err = connPool.QueryRow("SELECT * FROM currencies WHERE id=$1", 1).Scan(&id, &code)
 	if err != nil {
 		fmt.Printf("Query ro failed: %v", err)
 		os.Exit(1)
