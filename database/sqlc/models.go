@@ -5,54 +5,8 @@
 package db
 
 import (
-	"database/sql/driver"
-	"fmt"
-
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-type TransactionTypeEnum string
-
-const (
-	TransactionTypeEnumIncome   TransactionTypeEnum = "income"
-	TransactionTypeEnumExpense  TransactionTypeEnum = "expense"
-	TransactionTypeEnumTransfer TransactionTypeEnum = "transfer"
-)
-
-func (e *TransactionTypeEnum) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = TransactionTypeEnum(s)
-	case string:
-		*e = TransactionTypeEnum(s)
-	default:
-		return fmt.Errorf("unsupported scan type for TransactionTypeEnum: %T", src)
-	}
-	return nil
-}
-
-type NullTransactionTypeEnum struct {
-	TransactionTypeEnum TransactionTypeEnum
-	Valid               bool // Valid is true if TransactionTypeEnum is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullTransactionTypeEnum) Scan(value interface{}) error {
-	if value == nil {
-		ns.TransactionTypeEnum, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.TransactionTypeEnum.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullTransactionTypeEnum) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.TransactionTypeEnum), nil
-}
 
 type Account struct {
 	ID         int64
@@ -66,7 +20,7 @@ type Account struct {
 type Category struct {
 	ID                int32
 	Name              string
-	TransactionTypeID TransactionTypeEnum
+	TransactionTypeID int32
 	CreatedAt         pgtype.Timestamptz
 	UpdatedAt         pgtype.Timestamptz
 }
@@ -82,4 +36,9 @@ type Entry struct {
 	CategoryID int32
 	Amount     pgtype.Numeric
 	CreatedAt  pgtype.Timestamptz
+}
+
+type TransactionType struct {
+	ID   int32
+	Name string
 }

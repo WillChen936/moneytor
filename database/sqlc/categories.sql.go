@@ -21,7 +21,7 @@ RETURNING id, name, transaction_type_id, created_at, updated_at
 
 type CreateCategoryParams struct {
 	Name              string
-	TransactionTypeID TransactionTypeEnum
+	TransactionTypeID int32
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
@@ -77,7 +77,7 @@ UPDATE categories
 type UpdateCategoryParams struct {
 	ID                int32
 	Name              string
-	TransactionTypeID TransactionTypeEnum
+	TransactionTypeID int32
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
