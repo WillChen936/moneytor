@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"log"
-	db "moneytor/database/sqlc"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,7 +10,7 @@ import (
 )
 
 func TestGetCurrency(t *testing.T) {
-	expected := db.Currency{
+	expected := Currency{
 		ID:           1,
 		CurrencyCode: "TWD",
 	}
@@ -22,7 +21,7 @@ func TestGetCurrency(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	queries := db.New(connPool)
+	queries := New(connPool)
 
 	currency, err := queries.GetCurrency(ctx, 1)
 	require.NoError(t, err)
