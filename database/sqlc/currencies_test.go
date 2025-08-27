@@ -2,10 +2,8 @@ package db
 
 import (
 	"context"
-	"log"
 	"testing"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,15 +13,7 @@ func TestGetCurrency(t *testing.T) {
 		CurrencyCode: "TWD",
 	}
 
-	ctx := context.Background()
-	connPool, err := pgxpool.New(ctx, "postgres://root:pass.123@localhost:5432/moneytor")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	queries := New(connPool)
-
-	currency, err := queries.GetCurrency(ctx, 1)
+	currency, err := testQueries.GetCurrency(context.Background(), 1)
 	require.NoError(t, err)
 	require.NotEmpty(t, currency)
 	require.Equal(t, expected, currency)
