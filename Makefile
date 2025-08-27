@@ -21,3 +21,7 @@ migratedown1:
 
 sqlc:
 	sqlc generate
+
+# Tests
+test:
+	go test -v ./...

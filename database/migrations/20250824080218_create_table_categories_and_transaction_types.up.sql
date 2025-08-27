@@ -8,8 +8,8 @@ INSERT INTO transaction_types (
     name
 )
 VALUES
-    (1, 'income'),
-    (2, 'expense'),
+    (1, 'expense'),
+    (2, 'income'),
     (3, 'transfer');
 
 CREATE TABLE categories (
