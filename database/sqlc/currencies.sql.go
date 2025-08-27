@@ -10,7 +10,7 @@ import (
 )
 
 const getCurrency = `-- name: GetCurrency :one
-SELECT id, currency_code 
+SELECT id, code 
   FROM currencies
  WHERE id = $1 LIMIT 1
 `
@@ -18,6 +18,32 @@ SELECT id, currency_code
 func (q *Queries) GetCurrency(ctx context.Context, id int16) (Currency, error) {
 	row := q.db.QueryRow(ctx, getCurrency, id)
 	var i Currency
-	err := row.Scan(&i.ID, &i.CurrencyCode)
+	err := row.Scan(&i.ID, &i.Code)
 	return i, err
+}
+
+const listCurrencies = `-- name: ListCurrencies :many
+SELECT id, code 
+  FROM currencies
+ ORDER BY id
+`
+
+func (q *Queries) ListCurrencies(ctx context.Context) ([]Currency, error) {
+	rows, err := q.db.Query(ctx, listCurrencies)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Currency
+	for rows.Next() {
+		var i Currency
+		if err := rows.Scan(&i.ID, &i.Code); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

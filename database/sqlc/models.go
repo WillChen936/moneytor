@@ -26,8 +26,8 @@ type Category struct {
 }
 
 type Currency struct {
-	ID           int16
-	CurrencyCode string
+	ID   int16
+	Code string
 }
 
 type Entry struct {
@@ -39,6 +39,6 @@ type Entry struct {
 }
 
 type TransactionType struct {
-	ID   int32
+	ID   int16
 	Name string
 }

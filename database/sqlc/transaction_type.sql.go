@@ -15,7 +15,7 @@ SELECT id, name
  WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetTransactionType(ctx context.Context, id int32) (TransactionType, error) {
+func (q *Queries) GetTransactionType(ctx context.Context, id int16) (TransactionType, error) {
 	row := q.db.QueryRow(ctx, getTransactionType, id)
 	var i TransactionType
 	err := row.Scan(&i.ID, &i.Name)

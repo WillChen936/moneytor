@@ -1,5 +1,5 @@
 CREATE TABLE transaction_types (
-    id      integer     PRIMARY KEY,
+    id      smallint    PRIMARY KEY,
     name    text        NOT NULL
 );
 

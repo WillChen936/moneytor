@@ -8,11 +8,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var countTransactionType int32 = 3
+var countTransactionType int16 = 3
 
 func TestGetTransactionType(t *testing.T) {
 	// Arrange
-	id := int32(1)
+	id := int16(1)
 
 	// Act
 	transactionType, err := testQueries.GetTransactionType(context.Background(), id)
@@ -23,14 +23,14 @@ func TestGetTransactionType(t *testing.T) {
 	require.NotEmpty(t, transactionType.Name)
 }
 
-func TestListTransactionType(t *testing.T) {
+func TestListTransactionTypes(t *testing.T) {
 	// Arrange
 	// Act
 	transactionTypes, err := testQueries.ListTransactionTypes(context.Background())
 
 	// Assert
 	require.NoError(t, err)
-	require.Equal(t, countTransactionType, int32(len(transactionTypes)))
+	require.Equal(t, countTransactionType, int16(len(transactionTypes)))
 	for _, types := range transactionTypes {
 		require.NotZero(t, types.ID)
 		require.NotEmpty(t, types.Name)
@@ -38,6 +38,6 @@ func TestListTransactionType(t *testing.T) {
 }
 
 func RandomTransactionType() (TransactionType, error) {
-	id := utils.RandomInt32Range(1, countTransactionType)
+	id := utils.RandomInt16Range(1, countTransactionType)
 	return testQueries.GetTransactionType(context.Background(), id)
 }

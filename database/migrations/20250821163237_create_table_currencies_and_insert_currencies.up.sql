@@ -1,11 +1,11 @@
 CREATE TABLE currencies (
-  id              smallint  PRIMARY KEY,
-  currency_code   text      NOT NULL
+  id    smallint  PRIMARY KEY,
+  code  text      NOT NULL
 );
 
 INSERT INTO currencies (
     id,
-    currency_code
+    code
 )
 VALUES
     (1, 'TWD'),
