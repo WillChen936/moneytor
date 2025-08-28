@@ -11,15 +11,7 @@ import (
 var countCurrencies int16 = 5
 
 func TestGetCurrency(t *testing.T) {
-	expected := Currency{
-		ID:   1,
-		Code: "TWD",
-	}
-
-	currency, err := testQueries.GetCurrency(context.Background(), 1)
-	require.NoError(t, err)
-	require.NotEmpty(t, currency)
-	require.Equal(t, expected, currency)
+	RandomCurrency(t)
 }
 
 func TestListCurrencies(t *testing.T) {
@@ -36,7 +28,18 @@ func TestListCurrencies(t *testing.T) {
 	}
 }
 
-func RandomCurrency() (Currency, error) {
+func RandomCurrency(t *testing.T) Currency {
+	// Arrange
 	id := utils.RandomInt16Range(1, countCurrencies)
-	return testQueries.GetCurrency(context.Background(), id)
+
+	// Act
+	currency, err := testQueries.GetCurrency(context.Background(), id)
+
+	// Assert
+	require.NoError(t, err)
+	require.NotEmpty(t, currency)
+	require.Equal(t, id, currency.ID)
+	require.NotEmpty(t, currency.Code)
+
+	return currency
 }

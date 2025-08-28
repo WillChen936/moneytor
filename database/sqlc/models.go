@@ -20,7 +20,7 @@ type Account struct {
 type Category struct {
 	ID                int32
 	Name              string
-	TransactionTypeID int32
+	TransactionTypeID int16
 	CreatedAt         pgtype.Timestamptz
 	UpdatedAt         pgtype.Timestamptz
 }

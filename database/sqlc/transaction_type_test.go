@@ -11,16 +11,7 @@ import (
 var countTransactionType int16 = 3
 
 func TestGetTransactionType(t *testing.T) {
-	// Arrange
-	id := int16(1)
-
-	// Act
-	transactionType, err := testQueries.GetTransactionType(context.Background(), id)
-
-	// Assert
-	require.NoError(t, err)
-	require.Equal(t, id, transactionType.ID)
-	require.NotEmpty(t, transactionType.Name)
+	RandomTransactionType(t)
 }
 
 func TestListTransactionTypes(t *testing.T) {
@@ -37,7 +28,17 @@ func TestListTransactionTypes(t *testing.T) {
 	}
 }
 
-func RandomTransactionType() (TransactionType, error) {
+func RandomTransactionType(t *testing.T) TransactionType {
+	// Arrange
 	id := utils.RandomInt16Range(1, countTransactionType)
-	return testQueries.GetTransactionType(context.Background(), id)
+
+	// Act
+	transactionType, err := testQueries.GetTransactionType(context.Background(), id)
+
+	// Assert
+	require.NoError(t, err)
+	require.Equal(t, id, transactionType.ID)
+	require.NotEmpty(t, transactionType.Name)
+
+	return transactionType
 }

@@ -15,7 +15,7 @@ VALUES
 CREATE TABLE categories (
     id                      integer                 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name                    text                    NOT NULL,
-    transaction_type_id     integer                 NOT NULL,
+    transaction_type_id     smallint                NOT NULL,
     created_at              timestamptz             NOT NULL DEFAULT NOW(),
     updated_at              timestamptz             NOT NULL DEFAULT NOW()
 );
