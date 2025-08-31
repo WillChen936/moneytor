@@ -5,6 +5,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -13,16 +15,16 @@ type Account struct {
 	Owner      string
 	CurrencyID int16
 	Balance    pgtype.Numeric
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 type Category struct {
 	ID                int32
 	Name              string
 	TransactionTypeID int16
-	CreatedAt         pgtype.Timestamptz
-	UpdatedAt         pgtype.Timestamptz
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 type Currency struct {
@@ -35,7 +37,7 @@ type Entry struct {
 	AccountID  int64
 	CategoryID int32
 	Amount     pgtype.Numeric
-	CreatedAt  pgtype.Timestamptz
+	CreatedAt  time.Time
 }
 
 type TransactionType struct {

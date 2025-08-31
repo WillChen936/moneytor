@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCategory = `-- name: CreateCategory :one
@@ -21,7 +23,7 @@ RETURNING id, name, transaction_type_id, created_at, updated_at
 
 type CreateCategoryParams struct {
 	Name              string
-	TransactionTypeID int32
+	TransactionTypeID int16
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
@@ -67,20 +69,30 @@ func (q *Queries) GetCategory(ctx context.Context, id int32) (Category, error) {
 	return i, err
 }
 
-const updateCategory = `-- name: UpdateCategory :exec
+const updateCategory = `-- name: UpdateCategory :one
 UPDATE categories
-   SET name = $2,
-       transaction_type_id = $3
+   SET name = COALESCE($2, name),
+       transaction_type_id = COALESCE($3, transaction_type_id),
+       updated_at = NOW()
  WHERE id = $1
+RETURNING id, name, transaction_type_id, created_at, updated_at
 `
 
 type UpdateCategoryParams struct {
 	ID                int32
-	Name              string
-	TransactionTypeID int32
+	Name              pgtype.Text
+	TransactionTypeID pgtype.Int2
 }
 
-func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
-	_, err := q.db.Exec(ctx, updateCategory, arg.ID, arg.Name, arg.TransactionTypeID)
-	return err
+func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error) {
+	row := q.db.QueryRow(ctx, updateCategory, arg.ID, arg.Name, arg.TransactionTypeID)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.TransactionTypeID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
