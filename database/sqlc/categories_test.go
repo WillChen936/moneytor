@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
@@ -137,7 +138,7 @@ func TestDeleteCategory(t *testing.T) {
 
 	require.NoError(t, errDelete)
 	require.Error(t, errGet)
-	require.EqualError(t, errGet, ErrRecordNotFound.Error())
+	require.EqualError(t, errGet, pgx.ErrNoRows.Error())
 	require.Empty(t, categoryGet)
 }
 

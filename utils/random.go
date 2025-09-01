@@ -21,6 +21,13 @@ func RandomInt32Range(min, max int32) int32 {
 	return min + rand.Int31n(max-min+1)
 }
 
+func RandomInt64Range(min, max int64) int64 {
+	if max <= min {
+		return min
+	}
+	return min + rand.Int63n(max-min+1)
+}
+
 func RandomString(length int) string {
 	var sb strings.Builder
 	k := len(alphabet)
