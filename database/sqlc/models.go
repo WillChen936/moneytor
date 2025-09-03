@@ -7,14 +7,14 @@ package db
 import (
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
 
 type Account struct {
 	ID         int64
 	Owner      string
 	CurrencyID int16
-	Balance    pgtype.Numeric
+	Balance    decimal.Decimal
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
@@ -36,7 +36,7 @@ type Entry struct {
 	ID         int64
 	AccountID  int64
 	CategoryID int32
-	Amount     pgtype.Numeric
+	Amount     decimal.Decimal
 	CreatedAt  time.Time
 }
 
