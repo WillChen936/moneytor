@@ -8,7 +8,7 @@ package db
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
 
 const createEntry = `-- name: CreateEntry :one
@@ -25,31 +25,11 @@ RETURNING id, account_id, category_id, amount, created_at
 type CreateEntryParams struct {
 	AccountID  int64
 	CategoryID int32
-	Amount     pgtype.Numeric
+	Amount     decimal.Decimal
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
 	row := q.db.QueryRow(ctx, createEntry, arg.AccountID, arg.CategoryID, arg.Amount)
-	var i Entry
-	err := row.Scan(
-		&i.ID,
-		&i.AccountID,
-		&i.CategoryID,
-		&i.Amount,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
-const getEntry = `-- name: GetEntry :one
-SELECT id, account_id, category_id, amount, created_at
-  FROM entries
- WHERE id = $1
- LIMIT 1
-`
-
-func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
-	row := q.db.QueryRow(ctx, getEntry, id)
 	var i Entry
 	err := row.Scan(
 		&i.ID,

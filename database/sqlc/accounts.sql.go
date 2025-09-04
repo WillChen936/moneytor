@@ -8,7 +8,7 @@ package db
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
 
 const createAccount = `-- name: CreateAccount :one
@@ -25,7 +25,7 @@ RETURNING id, owner, currency_id, balance, created_at, updated_at
 type CreateAccountParams struct {
 	Owner      string
 	CurrencyID int16
-	Balance    pgtype.Numeric
+	Balance    decimal.Decimal
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
@@ -73,35 +73,6 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 	return i, err
 }
 
-const updateAccount = `-- name: UpdateAccount :one
-UPDATE accounts
-   SET owner = COALESCE($2, owner),
-       balance = COALESCE($3, balance),
-       updated_at = NOW()
- WHERE id = $1
-RETURNING id, owner, currency_id, balance, created_at, updated_at
-`
-
-type UpdateAccountParams struct {
-	ID      int64
-	Owner   pgtype.Text
-	Balance pgtype.Numeric
-}
-
-func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error) {
-	row := q.db.QueryRow(ctx, updateAccount, arg.ID, arg.Owner, arg.Balance)
-	var i Account
-	err := row.Scan(
-		&i.ID,
-		&i.Owner,
-		&i.CurrencyID,
-		&i.Balance,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const updateAccountBalance = `-- name: UpdateAccountBalance :one
 UPDATE accounts
    SET balance = balance + $2,
@@ -112,7 +83,7 @@ RETURNING id, owner, currency_id, balance, created_at, updated_at
 
 type UpdateAccountBalanceParams struct {
 	ID     int64
-	Amount pgtype.Numeric
+	Amount decimal.Decimal
 }
 
 func (q *Queries) UpdateAccountBalance(ctx context.Context, arg UpdateAccountBalanceParams) (Account, error) {
