@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log"
+	"moneytor/utils"
 	"os"
 	"testing"
 
@@ -13,8 +14,12 @@ import (
 var connPool *pgxpool.Pool
 
 func TestMain(m *testing.M) {
-	var err error
-	connPool, err = pgxpool.New(context.Background(), "postgres://root:pass.123@localhost:5432/moneytor")
+	config, err := utils.LoadConfig("../../config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	connPool, err = pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
 		log.Fatal(err)
 	}
