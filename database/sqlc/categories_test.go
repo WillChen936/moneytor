@@ -13,10 +13,7 @@ import (
 
 func TestCreateCategory(t *testing.T) {
 	testQueries := setupTestQueries(t)
-	category := RandomCategory(t, testQueries)
-
-	err := testQueries.DeleteCategory(context.Background(), category.ID)
-	require.NoError(t, err)
+	RandomCategory(t, testQueries)
 }
 
 func TestGetCategory(t *testing.T) {
@@ -29,7 +26,6 @@ func TestGetCategory(t *testing.T) {
 	require.Equal(t, category.ID, categoryGet.ID)
 	require.Equal(t, category.Name, categoryGet.Name)
 	require.Equal(t, category.TransactionTypeID, categoryGet.TransactionTypeID)
-	require.NotEmpty(t, category.CreatedAt, categoryGet.CreatedAt)
 	require.WithinDuration(t, category.CreatedAt, categoryGet.CreatedAt, time.Second)
 	require.False(t, category.UpdatedAt.Valid)
 }

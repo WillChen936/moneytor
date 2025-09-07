@@ -69,14 +69,14 @@ func TestDeleteAccount(t *testing.T) {
 	require.Empty(t, accountGet)
 }
 
-func RandomAccount(t *testing.T, q *Queries) Account {
+func RandomAccount(t *testing.T, testQueries *Queries) Account {
 	arg := CreateAccountParams{
 		Owner:      utils.RandomString(6),
-		CurrencyID: RandomCurrency(t, q).ID,
+		CurrencyID: RandomCurrency(t, testQueries).ID,
 		Balance:    utils.RandomDecimalRange(100, 10000, 2),
 	}
 
-	account, err := q.CreateAccount(context.Background(), arg)
+	account, err := testQueries.CreateAccount(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, account.ID)
