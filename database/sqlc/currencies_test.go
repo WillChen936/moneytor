@@ -11,10 +11,12 @@ import (
 var countCurrencies int16 = 5
 
 func TestGetCurrency(t *testing.T) {
-	RandomCurrency(t)
+	testQueries := setupTestQueries(t)
+	RandomCurrency(t, testQueries)
 }
 
 func TestListCurrencies(t *testing.T) {
+	testQueries := setupTestQueries(t)
 	currencies, err := testQueries.ListCurrencies(context.Background())
 
 	require.NoError(t, err)
@@ -25,10 +27,10 @@ func TestListCurrencies(t *testing.T) {
 	}
 }
 
-func RandomCurrency(t *testing.T) Currency {
+func RandomCurrency(t *testing.T, q *Queries) Currency {
 	id := utils.RandomInt16Range(1, countCurrencies)
 
-	currency, err := testQueries.GetCurrency(context.Background(), id)
+	currency, err := q.GetCurrency(context.Background(), id)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, currency)

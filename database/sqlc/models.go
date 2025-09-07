@@ -7,6 +7,7 @@ package db
 import (
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
 )
 
@@ -16,7 +17,7 @@ type Account struct {
 	CurrencyID int16
 	Balance    decimal.Decimal
 	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	UpdatedAt  pgtype.Timestamptz
 }
 
 type Category struct {
@@ -24,7 +25,7 @@ type Category struct {
 	Name              string
 	TransactionTypeID int16
 	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	UpdatedAt         pgtype.Timestamptz
 }
 
 type Currency struct {

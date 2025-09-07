@@ -4,7 +4,7 @@ CREATE TABLE accounts (
   currency_id   smallint        NOT NULL,
   balance       numeric(19,6)   NOT NULL DEFAULT 0,
   created_at    timestamptz     NOT NULL DEFAULT NOW(),
-  updated_at    timestamptz     NOT NULL DEFAULT NOW()
+  updated_at    timestamptz     NULL
 );
 CREATE INDEX ON accounts(owner);
 ALTER TABLE accounts ADD FOREIGN KEY (currency_id) REFERENCES currencies (id);

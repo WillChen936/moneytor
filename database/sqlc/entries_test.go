@@ -9,15 +9,17 @@ import (
 )
 
 func TestCreatEntry(t *testing.T) {
-	account := RandomAccount(t)
-	RandomEntry(t, account.ID)
+	testQueries := setupTestQueries(t)
+	account := RandomAccount(t, testQueries)
+	RandomEntry(t, testQueries, account.ID)
 }
 
 func TestListEntries(t *testing.T) {
-	account := RandomAccount(t)
+	testQueries := setupTestQueries(t)
+	account := RandomAccount(t, testQueries)
 	var lastEntry Entry
 	for i := 0; i < 10; i++ {
-		lastEntry = RandomEntry(t, account.ID)
+		lastEntry = RandomEntry(t, testQueries, account.ID)
 	}
 
 	arg := ListEntriesParams{
@@ -37,8 +39,8 @@ func TestListEntries(t *testing.T) {
 	}
 }
 
-func RandomEntry(t *testing.T, accountID int64) Entry {
-	category := RandomCategory(t)
+func RandomEntry(t *testing.T, testQueries *Queries, accountID int64) Entry {
+	category := RandomCategory(t, testQueries)
 
 	arg := CreateEntryParams{
 		AccountID:  accountID,

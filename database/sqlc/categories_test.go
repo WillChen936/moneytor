@@ -12,14 +12,16 @@ import (
 )
 
 func TestCreateCategory(t *testing.T) {
-	category := RandomCategory(t)
+	testQueries := setupTestQueries(t)
+	category := RandomCategory(t, testQueries)
 
 	err := testQueries.DeleteCategory(context.Background(), category.ID)
 	require.NoError(t, err)
 }
 
 func TestGetCategory(t *testing.T) {
-	category := RandomCategory(t)
+	testQueries := setupTestQueries(t)
+	category := RandomCategory(t, testQueries)
 
 	categoryGet, err := testQueries.GetCategory(context.Background(), category.ID)
 
@@ -29,16 +31,13 @@ func TestGetCategory(t *testing.T) {
 	require.Equal(t, category.TransactionTypeID, categoryGet.TransactionTypeID)
 	require.NotEmpty(t, category.CreatedAt, categoryGet.CreatedAt)
 	require.WithinDuration(t, category.CreatedAt, categoryGet.CreatedAt, time.Second)
-	require.NotEmpty(t, category.UpdatedAt, categoryGet.UpdatedAt)
-	require.WithinDuration(t, category.UpdatedAt, categoryGet.UpdatedAt, time.Second)
-
-	err = testQueries.DeleteCategory(context.Background(), category.ID)
-	require.NoError(t, err)
+	require.False(t, category.UpdatedAt.Valid)
 }
 
 func TestUpdateCategory(t *testing.T) {
 	t.Run("UpdateOnlyName", func(t *testing.T) {
-		category := RandomCategory(t)
+		testQueries := setupTestQueries(t)
+		category := RandomCategory(t, testQueries)
 
 		newName := utils.RandomString(6)
 
@@ -61,14 +60,13 @@ func TestUpdateCategory(t *testing.T) {
 		require.Equal(t, newName, categoryUpdated.Name)
 		require.Equal(t, category.TransactionTypeID, categoryUpdated.TransactionTypeID)
 		require.WithinDuration(t, category.CreatedAt, categoryUpdated.CreatedAt, time.Second)
-		require.True(t, categoryUpdated.UpdatedAt.After(category.UpdatedAt))
-
-		err = testQueries.DeleteCategory(context.Background(), category.ID)
-		require.NoError(t, err)
+		require.True(t, categoryUpdated.UpdatedAt.Valid)
+		require.GreaterOrEqual(t, categoryUpdated.UpdatedAt.Time, categoryUpdated.CreatedAt)
 	})
 
 	t.Run("UpdateOnlyTransactionID", func(t *testing.T) {
-		category := RandomCategory(t)
+		testQueries := setupTestQueries(t)
+		category := RandomCategory(t, testQueries)
 
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
 
@@ -91,14 +89,13 @@ func TestUpdateCategory(t *testing.T) {
 		require.Equal(t, category.Name, categoryUpdated.Name)
 		require.Equal(t, newTransactionTypeID, categoryUpdated.TransactionTypeID)
 		require.WithinDuration(t, category.CreatedAt, categoryUpdated.CreatedAt, time.Second)
-		require.True(t, categoryUpdated.UpdatedAt.After(category.UpdatedAt))
-
-		err = testQueries.DeleteCategory(context.Background(), category.ID)
-		require.NoError(t, err)
+		require.True(t, categoryUpdated.UpdatedAt.Valid)
+		require.GreaterOrEqual(t, categoryUpdated.UpdatedAt.Time, categoryUpdated.CreatedAt)
 	})
 
 	t.Run("UpdateAll", func(t *testing.T) {
-		category := RandomCategory(t)
+		testQueries := setupTestQueries(t)
+		category := RandomCategory(t, testQueries)
 
 		newName := utils.RandomString(6)
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
@@ -123,15 +120,14 @@ func TestUpdateCategory(t *testing.T) {
 		require.Equal(t, newName, categoryUpdated.Name)
 		require.Equal(t, newTransactionTypeID, categoryUpdated.TransactionTypeID)
 		require.WithinDuration(t, category.CreatedAt, categoryUpdated.CreatedAt, time.Second)
-		require.True(t, categoryUpdated.UpdatedAt.After(category.UpdatedAt))
-
-		err = testQueries.DeleteCategory(context.Background(), category.ID)
-		require.NoError(t, err)
+		require.True(t, categoryUpdated.UpdatedAt.Valid)
+		require.GreaterOrEqual(t, categoryUpdated.UpdatedAt.Time, categoryUpdated.CreatedAt)
 	})
 }
 
 func TestDeleteCategory(t *testing.T) {
-	category := RandomCategory(t)
+	testQueries := setupTestQueries(t)
+	category := RandomCategory(t, testQueries)
 
 	errDelete := testQueries.DeleteCategory(context.Background(), category.ID)
 	categoryGet, errGet := testQueries.GetCategory(context.Background(), category.ID)
@@ -142,8 +138,8 @@ func TestDeleteCategory(t *testing.T) {
 	require.Empty(t, categoryGet)
 }
 
-func RandomCategory(t *testing.T) Category {
-	transactionType := RandomTransactionType(t)
+func RandomCategory(t *testing.T, testQueries *Queries) Category {
+	transactionType := RandomTransactionType(t, testQueries)
 
 	arg := CreateCategoryParams{
 		Name:              utils.RandomString(6),
@@ -157,7 +153,7 @@ func RandomCategory(t *testing.T) Category {
 	require.Equal(t, arg.Name, category.Name)
 	require.Equal(t, arg.TransactionTypeID, category.TransactionTypeID)
 	require.NotZero(t, category.CreatedAt)
-	require.NotZero(t, category.UpdatedAt)
+	require.False(t, category.UpdatedAt.Valid)
 
 	return category
 }
