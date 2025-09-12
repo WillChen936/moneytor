@@ -1,3 +1,4 @@
 {
+    "env": "DEV",
     "db_source": "postgres://root:pass.123@localhost:5432/moneytor"
 }

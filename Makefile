@@ -25,3 +25,7 @@ sqlc:
 # Tests
 test:
 	go test -v -count=1 ./...
+
+# app
+server:
+	go run main.go

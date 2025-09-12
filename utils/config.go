@@ -6,6 +6,7 @@ import (
 )
 
 type Config struct {
+	Env      string `json:"env"`
 	DBSource string `json:"db_source"`
 }
 

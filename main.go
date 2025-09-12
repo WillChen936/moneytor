@@ -2,29 +2,30 @@ package main
 
 import (
 	"context"
-	"fmt"
-	db "moneytor/database/sqlc"
+	"moneytor/utils"
 	"os"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func main() {
-	ctx := context.Background()
-	connPool, err := pgxpool.New(ctx, "postgres://root:pass.123@localhost:5432/moneytor")
+	config, err := utils.LoadConfig("config.json")
 	if err != nil {
-		fmt.Printf("Unable to connect to database: %v", err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("Unable to load config")
+	}
+
+	if config.Env == "DEV" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+
+	ctx := context.Background()
+	connPool, err := pgxpool.New(ctx, config.DBSource)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Unable to connect to database")
 	}
 	defer connPool.Close()
-
-	queries := db.New(connPool)
-	currency, err := queries.GetCurrency(ctx, 1)
-	if err != nil {
-		fmt.Printf("Unable to get currency_id = 1")
-		os.Exit(1)
-	}
-
-	fmt.Println(currency)
 }
