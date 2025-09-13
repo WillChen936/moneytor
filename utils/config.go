@@ -6,8 +6,9 @@ import (
 )
 
 type Config struct {
-	Env      string `json:"env"`
-	DBSource string `json:"db_source"`
+	Env               string `json:"Env"`
+	DBSource          string `json:"DBSource"`
+	HttpServerAddress string `json:"HttpServerAddress"`
 }
 
 func LoadConfig(path string) (Config, error) {

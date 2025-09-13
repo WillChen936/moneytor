@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"moneytor/api"
+	db "moneytor/database/sqlc"
 	"moneytor/utils"
 	"os"
 
@@ -27,5 +29,14 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to connect to database")
 	}
+
 	defer connPool.Close()
+
+	queries := db.New(connPool)
+
+	server := api.NewServer(queries)
+
+	if err := server.Start(config.HttpServerAddress); err != nil {
+		log.Fatal().Err(err).Msg("Unable to start server")
+	}
 }
