@@ -21,6 +21,7 @@ func NewServer(queries *db.Queries) *Server {
 	v1Routes := router.Group("/api/v1")
 
 	v1Routes.GET("health", server.health)
+	v1Routes.POST("accounts", server.createAccount)
 
 	server.router = router
 	return server
