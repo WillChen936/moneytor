@@ -36,3 +36,7 @@ func (s *Server) health(ctx *gin.Context) {
 		"status": "ok",
 	})
 }
+
+func errResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
+}
