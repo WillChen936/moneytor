@@ -13,27 +13,27 @@ import (
 
 const createAccount = `-- name: CreateAccount :one
 INSERT INTO accounts (
-    owner,
+    name,
     currency_id,
     balance    
 ) VALUES (
   $1, $2, $3
 )
-RETURNING id, owner, currency_id, balance, created_at, updated_at
+RETURNING id, name, currency_id, balance, created_at, updated_at
 `
 
 type CreateAccountParams struct {
-	Owner      string
+	Name       string
 	CurrencyID int16
 	Balance    decimal.Decimal
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
-	row := q.db.QueryRow(ctx, createAccount, arg.Owner, arg.CurrencyID, arg.Balance)
+	row := q.db.QueryRow(ctx, createAccount, arg.Name, arg.CurrencyID, arg.Balance)
 	var i Account
 	err := row.Scan(
 		&i.ID,
-		&i.Owner,
+		&i.Name,
 		&i.CurrencyID,
 		&i.Balance,
 		&i.CreatedAt,
@@ -53,7 +53,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
 }
 
 const getAccount = `-- name: GetAccount :one
-SELECT id, owner, currency_id, balance, created_at, updated_at
+SELECT id, name, currency_id, balance, created_at, updated_at
   FROM accounts
  WHERE id = $1
  LIMIT 1
@@ -64,7 +64,7 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 	var i Account
 	err := row.Scan(
 		&i.ID,
-		&i.Owner,
+		&i.Name,
 		&i.CurrencyID,
 		&i.Balance,
 		&i.CreatedAt,
@@ -78,7 +78,7 @@ UPDATE accounts
    SET balance = balance + $2,
        updated_at = NOW()
  WHERE id = $1
-RETURNING id, owner, currency_id, balance, created_at, updated_at
+RETURNING id, name, currency_id, balance, created_at, updated_at
 `
 
 type UpdateAccountBalanceParams struct {
@@ -91,7 +91,7 @@ func (q *Queries) UpdateAccountBalance(ctx context.Context, arg UpdateAccountBal
 	var i Account
 	err := row.Scan(
 		&i.ID,
-		&i.Owner,
+		&i.Name,
 		&i.CurrencyID,
 		&i.Balance,
 		&i.CreatedAt,

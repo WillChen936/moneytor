@@ -13,7 +13,7 @@ import (
 
 type Account struct {
 	ID         int64
-	Owner      string
+	Name       string
 	CurrencyID int16
 	Balance    decimal.Decimal
 	CreatedAt  time.Time

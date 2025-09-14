@@ -1,6 +1,6 @@
 -- name: CreateAccount :one
 INSERT INTO accounts (
-    owner,
+    name,
     currency_id,
     balance    
 ) VALUES (
