@@ -8,9 +8,9 @@ import (
 )
 
 type createAccountRequest struct {
-	Name           string  `json:"Name"`
-	CurrencyID     int16   `json:"CurrencyID"`
-	InitialBalance Decimal `json:"InitialBalance"`
+	Name           string  `json:"Name" binding:"required"`
+	CurrencyID     int16   `json:"CurrencyID" binding:"gt=0"`
+	InitialBalance Decimal `json:"InitialBalance" binding:"required"`
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
@@ -19,12 +19,6 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
-
-	// initialBalance, err := decimal.NewFromString(req.InitialBalance)
-	// if err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, errResponse(err))
-	// 	return
-	// }
 
 	arg := db.CreateAccountParams{
 		Name:       req.Name,
