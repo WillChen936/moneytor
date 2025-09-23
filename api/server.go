@@ -8,11 +8,11 @@ import (
 )
 
 type Server struct {
-	queries *db.Queries
+	queries db.Querier
 	router  *gin.Engine
 }
 
-func NewServer(queries *db.Queries) *Server {
+func NewServer(queries db.Querier) *Server {
 	server := &Server{
 		queries: queries,
 	}

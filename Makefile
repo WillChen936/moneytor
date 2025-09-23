@@ -22,9 +22,12 @@ migratedown1:
 sqlc:
 	sqlc generate
 
+mockdb:
+	mockgen -source=database/sqlc/querier.go -destination=database/mocks/mock_querier.go -package=mockdb
+
 # Tests
 test:
-	go test -v -count=1 ./...
+	go test -count=1 ./...
 
 # app
 server:
