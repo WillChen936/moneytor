@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
@@ -25,30 +26,25 @@ func TestCreateAccount(t *testing.T) {
 	mockQuerier := mockdb.NewMockQuerier(ctrl)
 	server := NewServer(mockQuerier)
 
-	testName := utils.RandomString(10)
-	testCurrencyID := int16(1)
-	testBalance, err := decimal.NewFromString("1000.00")
-	require.NoError(t, err)
+	account := createRandomAccount()
 
-	requestBody := createAccountRequest{
-		Name:       testName,
-		CurrencyID: testCurrencyID,
-		InitialBalance: Decimal{
-			Decimal: testBalance,
-		},
+	requestBody := gin.H{
+		"name":           account.Name,
+		"currencyId":     account.CurrencyID,
+		"initialBalance": account.Balance.String(),
 	}
 
 	params := db.CreateAccountParams{
-		Name:       testName,
-		CurrencyID: testCurrencyID,
-		Balance:    testBalance,
+		Name:       account.Name,
+		CurrencyID: account.CurrencyID,
+		Balance:    account.Balance,
 	}
 
 	stubs := db.Account{
-		ID:         utils.RandomInt64Range(1, 1000),
-		Name:       utils.RandomString(10),
-		CurrencyID: testCurrencyID,
-		Balance:    testBalance,
+		ID:         account.ID,
+		Name:       account.Name,
+		CurrencyID: account.CurrencyID,
+		Balance:    account.Balance,
 		CreatedAt:  time.Now(),
 		UpdatedAt: pgtype.Timestamptz{
 			Valid: false,
@@ -101,6 +97,15 @@ func TestCreateAccountFail(t *testing.T) {
 	server.router.ServeHTTP(recorder, request)
 
 	require.Equal(t, http.StatusBadRequest, recorder.Code)
+}
+
+func createRandomAccount() db.Account {
+	return db.Account{
+		ID:         utils.RandomInt64Range(1, 1000),
+		Name:       utils.RandomString(10),
+		CurrencyID: utils.RandomInt16Range(1, 10),
+		Balance:    utils.RandomDecimalRange(-1000, 1000, 2),
+	}
 }
 
 func eqCreateAccountParams(arg db.CreateAccountParams) gomock.Matcher {

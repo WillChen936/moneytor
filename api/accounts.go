@@ -8,9 +8,9 @@ import (
 )
 
 type createAccountRequest struct {
-	Name           string  `json:"Name" binding:"required"`
-	CurrencyID     int16   `json:"CurrencyID" binding:"gt=0"`
-	InitialBalance Decimal `json:"InitialBalance" binding:"required"`
+	Name           string  `json:"name" binding:"required"`
+	CurrencyID     int16   `json:"currencyID" binding:"gt=0"`
+	InitialBalance Decimal `json:"initialBalance" binding:"required"`
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
