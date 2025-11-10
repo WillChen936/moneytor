@@ -69,6 +69,40 @@ func TestCreateAccount(t *testing.T) {
 	require.Equal(t, http.StatusOK, recorder.Code)
 }
 
+func TestCreateAccountFail(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockQuerier := mockdb.NewMockQuerier(ctrl)
+	server := NewServer(mockQuerier)
+
+	testName := utils.RandomString(10)
+	testCurrencyID := int16(-1)
+	testBalance, err := decimal.NewFromString("1000.00")
+	require.NoError(t, err)
+
+	requestBody := createAccountRequest{
+		Name:       testName,
+		CurrencyID: testCurrencyID,
+		InitialBalance: Decimal{
+			Decimal: testBalance,
+		},
+	}
+
+	mockQuerier.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
+
+	data, err := json.Marshal(requestBody)
+	require.NoError(t, err)
+
+	recorder := httptest.NewRecorder()
+	request, err := http.NewRequest(http.MethodPost, "/api/v1/accounts", bytes.NewReader(data))
+	require.NoError(t, err)
+
+	server.router.ServeHTTP(recorder, request)
+
+	require.Equal(t, http.StatusBadRequest, recorder.Code)
+}
+
 func eqCreateAccountParams(arg db.CreateAccountParams) gomock.Matcher {
 	return eqCreateAccountParamsMatcher{arg}
 }
