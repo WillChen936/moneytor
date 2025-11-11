@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	mockdb "moneytor/database/mocks"
@@ -10,93 +11,91 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
 func TestCreateAccount(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockQuerier := mockdb.NewMockQuerier(ctrl)
-	server := NewServer(mockQuerier)
-
 	account := createRandomAccount()
 
-	requestBody := gin.H{
-		"name":           account.Name,
-		"currencyId":     account.CurrencyID,
-		"initialBalance": account.Balance.String(),
-	}
+	testCases := []struct {
+		name          string
+		requestBody   gin.H
+		buildStub     func(mockQuerier *mockdb.MockQuerier)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			requestBody: gin.H{
+				"name":           account.Name,
+				"currencyId":     account.CurrencyID,
+				"initialBalance": account.Balance.String(),
+			},
+			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+				arg := db.CreateAccountParams{
+					Name:       account.Name,
+					CurrencyID: account.CurrencyID,
+					Balance:    account.Balance,
+				}
 
-	params := db.CreateAccountParams{
-		Name:       account.Name,
-		CurrencyID: account.CurrencyID,
-		Balance:    account.Balance,
-	}
-
-	stubs := db.Account{
-		ID:         account.ID,
-		Name:       account.Name,
-		CurrencyID: account.CurrencyID,
-		Balance:    account.Balance,
-		CreatedAt:  time.Now(),
-		UpdatedAt: pgtype.Timestamptz{
-			Valid: false,
+				mockQuerier.EXPECT().CreateAccount(gomock.Any(), eqCreateAccountParams(arg)).Times(1).Return(account, nil)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name: "IlleagalCurrnecyID",
+			requestBody: gin.H{
+				"name":           account.Name,
+				"currencyId":     -1,
+				"initialBalance": account.Balance.String(),
+			},
+			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+				mockQuerier.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "InternalError",
+			requestBody: gin.H{
+				"name":           account.Name,
+				"currencyId":     account.CurrencyID,
+				"initialBalance": account.Balance.String(),
+			},
+			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+				mockQuerier.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(1).Return(db.Account{}, sql.ErrConnDone)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
 		},
 	}
 
-	mockQuerier.EXPECT().CreateAccount(gomock.Any(), eqCreateAccountParams(params)).Times(1).Return(stubs, nil)
+	for _, testCase := range testCases {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
-	data, err := json.Marshal(requestBody)
-	require.NoError(t, err)
+		mockQuerier := mockdb.NewMockQuerier(ctrl)
+		testCase.buildStub(mockQuerier)
 
-	recorder := httptest.NewRecorder()
-	request, err := http.NewRequest(http.MethodPost, "/api/v1/accounts", bytes.NewReader(data))
-	require.NoError(t, err)
+		server := NewServer(mockQuerier)
 
-	server.router.ServeHTTP(recorder, request)
+		data, err := json.Marshal(testCase.requestBody)
+		require.NoError(t, err)
 
-	require.Equal(t, http.StatusOK, recorder.Code)
-}
+		recorder := httptest.NewRecorder()
+		request, err := http.NewRequest(http.MethodPost, "/api/v1/accounts", bytes.NewReader(data))
+		require.NoError(t, err)
 
-func TestCreateAccountFail(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+		server.router.ServeHTTP(recorder, request)
 
-	mockQuerier := mockdb.NewMockQuerier(ctrl)
-	server := NewServer(mockQuerier)
-
-	testName := utils.RandomString(10)
-	testCurrencyID := int16(-1)
-	testBalance, err := decimal.NewFromString("1000.00")
-	require.NoError(t, err)
-
-	requestBody := createAccountRequest{
-		Name:       testName,
-		CurrencyID: testCurrencyID,
-		InitialBalance: Decimal{
-			Decimal: testBalance,
-		},
+		testCase.checkResponse(t, recorder)
 	}
-
-	mockQuerier.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
-
-	data, err := json.Marshal(requestBody)
-	require.NoError(t, err)
-
-	recorder := httptest.NewRecorder()
-	request, err := http.NewRequest(http.MethodPost, "/api/v1/accounts", bytes.NewReader(data))
-	require.NoError(t, err)
-
-	server.router.ServeHTTP(recorder, request)
-
-	require.Equal(t, http.StatusBadRequest, recorder.Code)
 }
 
 func createRandomAccount() db.Account {
