@@ -30,6 +30,27 @@ func TestGetCategory(t *testing.T) {
 	require.False(t, category.UpdatedAt.Valid)
 }
 
+func TestListCategories(t *testing.T) {
+	testQueries := setupTestQueries(t)
+	for i := 0; i < 10; i++ {
+		RandomCategory(t, testQueries)
+	}
+
+	limit := int32(5)
+	offset := int32(0)
+
+	arg := ListCategoriesParams{
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	categories, err := testQueries.ListCategories(context.Background(), arg)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, categories)
+	require.Len(t, categories, int(limit))
+}
+
 func TestUpdateCategory(t *testing.T) {
 	t.Run("UpdateOnlyName", func(t *testing.T) {
 		testQueries := setupTestQueries(t)

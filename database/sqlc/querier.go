@@ -18,6 +18,7 @@ type Querier interface {
 	GetCategory(ctx context.Context, id int32) (Category, error)
 	GetCurrency(ctx context.Context, id int16) (Currency, error)
 	GetTransactionType(ctx context.Context, id int16) (TransactionType, error)
+	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListCurrencies(ctx context.Context) ([]Currency, error)
 	ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error)
 	ListTransactionTypes(ctx context.Context) ([]TransactionType, error)

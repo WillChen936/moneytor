@@ -174,6 +174,21 @@ func (mr *MockQuerierMockRecorder) GetTransactionType(ctx, id any) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionType", reflect.TypeOf((*MockQuerier)(nil).GetTransactionType), ctx, id)
 }
 
+// ListCategories mocks base method.
+func (m *MockQuerier) ListCategories(ctx context.Context, arg db.ListCategoriesParams) ([]db.Category, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListCategories", ctx, arg)
+	ret0, _ := ret[0].([]db.Category)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListCategories indicates an expected call of ListCategories.
+func (mr *MockQuerierMockRecorder) ListCategories(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCategories", reflect.TypeOf((*MockQuerier)(nil).ListCategories), ctx, arg)
+}
+
 // ListCurrencies mocks base method.
 func (m *MockQuerier) ListCurrencies(ctx context.Context) ([]db.Currency, error) {
 	m.ctrl.T.Helper()
