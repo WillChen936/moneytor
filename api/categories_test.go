@@ -118,7 +118,7 @@ func TestCreateCategory(t *testing.T) {
 
 func TestListCategory(t *testing.T) {
 	categories := []db.Category{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10; i++ {
 		categories = append(categories, createRandomCategory())
 	}
 
