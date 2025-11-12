@@ -44,7 +44,7 @@ DELETE FROM categories
  WHERE id = $1
 `
 
-func (q *Queries) DeleteCategory(ctx context.Context, id int32) error {
+func (q *Queries) DeleteCategory(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteCategory, id)
 	return err
 }
@@ -56,7 +56,7 @@ SELECT id, name, transaction_type_id, created_at, updated_at
  LIMIT 1
 `
 
-func (q *Queries) GetCategory(ctx context.Context, id int32) (Category, error) {
+func (q *Queries) GetCategory(ctx context.Context, id int64) (Category, error) {
 	row := q.db.QueryRow(ctx, getCategory, id)
 	var i Category
 	err := row.Scan(
@@ -118,7 +118,7 @@ RETURNING id, name, transaction_type_id, created_at, updated_at
 `
 
 type UpdateCategoryParams struct {
-	ID                int32
+	ID                int64
 	Name              pgtype.Text
 	TransactionTypeID pgtype.Int2
 }

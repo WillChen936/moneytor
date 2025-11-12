@@ -21,7 +21,7 @@ type Account struct {
 }
 
 type Category struct {
-	ID                int32
+	ID                int64
 	Name              string
 	TransactionTypeID int16
 	CreatedAt         time.Time
@@ -38,7 +38,7 @@ type Entry struct {
 	Name       string
 	Note       string
 	AccountID  int64
-	CategoryID int32
+	CategoryID int64
 	Amount     decimal.Decimal
 	CreatedAt  time.Time
 }

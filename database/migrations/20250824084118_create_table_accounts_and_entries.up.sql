@@ -14,7 +14,7 @@ CREATE TABLE entries (
   name          text            NOT NULL,
   note          text            NOT NULL DEFAULT '',
   account_id    bigint          NOT NULL,
-  category_id   integer         NOT NULL,
+  category_id   bigint          NOT NULL,
   amount        numeric(19,6)   NOT NULL,
   created_at    timestamptz     NOT NULL DEFAULT NOW()
 );

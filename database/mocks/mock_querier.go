@@ -101,7 +101,7 @@ func (mr *MockQuerierMockRecorder) DeleteAccount(ctx, id any) *gomock.Call {
 }
 
 // DeleteCategory mocks base method.
-func (m *MockQuerier) DeleteCategory(ctx context.Context, id int32) error {
+func (m *MockQuerier) DeleteCategory(ctx context.Context, id int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteCategory", ctx, id)
 	ret0, _ := ret[0].(error)
@@ -130,7 +130,7 @@ func (mr *MockQuerierMockRecorder) GetAccount(ctx, id any) *gomock.Call {
 }
 
 // GetCategory mocks base method.
-func (m *MockQuerier) GetCategory(ctx context.Context, id int32) (db.Category, error) {
+func (m *MockQuerier) GetCategory(ctx context.Context, id int64) (db.Category, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCategory", ctx, id)
 	ret0, _ := ret[0].(db.Category)

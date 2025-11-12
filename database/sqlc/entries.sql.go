@@ -28,7 +28,7 @@ type CreateEntryParams struct {
 	Name       string
 	Note       string
 	AccountID  int64
-	CategoryID int32
+	CategoryID int64
 	Amount     decimal.Decimal
 }
 

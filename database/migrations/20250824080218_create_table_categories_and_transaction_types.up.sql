@@ -13,7 +13,7 @@ VALUES
     (3, 'transfer');
 
 CREATE TABLE categories (
-    id                      integer                 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id                      bigint                 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name                    text                    NOT NULL,
     transaction_type_id     smallint                NOT NULL,
     created_at              timestamptz             NOT NULL DEFAULT NOW(),

@@ -215,7 +215,7 @@ func TestListCategory(t *testing.T) {
 
 func createRandomCategory() db.Category {
 	return db.Category{
-		ID:                utils.RandomInt32Range(1, 1000),
+		ID:                utils.RandomInt64Range(1, 1000),
 		Name:              utils.RandomString(10),
 		TransactionTypeID: utils.RandomInt16Range(1, 3),
 	}
