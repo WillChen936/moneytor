@@ -35,6 +35,8 @@ type Currency struct {
 
 type Entry struct {
 	ID         int64
+	Name       string
+	Note       string
 	AccountID  int64
 	CategoryID int32
 	Amount     decimal.Decimal

@@ -219,6 +219,21 @@ func (mr *MockQuerierMockRecorder) ListEntries(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEntries", reflect.TypeOf((*MockQuerier)(nil).ListEntries), ctx, arg)
 }
 
+// ListEntriesByAccountID mocks base method.
+func (m *MockQuerier) ListEntriesByAccountID(ctx context.Context, arg db.ListEntriesByAccountIDParams) ([]db.Entry, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListEntriesByAccountID", ctx, arg)
+	ret0, _ := ret[0].([]db.Entry)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListEntriesByAccountID indicates an expected call of ListEntriesByAccountID.
+func (mr *MockQuerierMockRecorder) ListEntriesByAccountID(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEntriesByAccountID", reflect.TypeOf((*MockQuerier)(nil).ListEntriesByAccountID), ctx, arg)
+}
+
 // ListTransactionTypes mocks base method.
 func (m *MockQuerier) ListTransactionTypes(ctx context.Context) ([]db.TransactionType, error) {
 	m.ctrl.T.Helper()

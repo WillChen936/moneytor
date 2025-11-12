@@ -13,26 +13,38 @@ import (
 
 const createEntry = `-- name: CreateEntry :one
 INSERT INTO entries (
-     account_id  
+     name
+    ,note
+    ,account_id  
     ,category_id 
     ,amount      
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4, $5
 )
-RETURNING id, account_id, category_id, amount, created_at
+RETURNING id, name, note, account_id, category_id, amount, created_at
 `
 
 type CreateEntryParams struct {
+	Name       string
+	Note       string
 	AccountID  int64
 	CategoryID int32
 	Amount     decimal.Decimal
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
-	row := q.db.QueryRow(ctx, createEntry, arg.AccountID, arg.CategoryID, arg.Amount)
+	row := q.db.QueryRow(ctx, createEntry,
+		arg.Name,
+		arg.Note,
+		arg.AccountID,
+		arg.CategoryID,
+		arg.Amount,
+	)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
+		&i.Note,
 		&i.AccountID,
 		&i.CategoryID,
 		&i.Amount,
@@ -42,22 +54,20 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
 }
 
 const listEntries = `-- name: ListEntries :many
-SELECT id, account_id, category_id, amount, created_at
+SELECT id, name, note, account_id, category_id, amount, created_at
   FROM entries
- WHERE account_id = $1
  ORDER BY id DESC
- LIMIT $2
- OFFSET $3
+ LIMIT $1
+ OFFSET $2
 `
 
 type ListEntriesParams struct {
-	AccountID int64
-	Limit     int32
-	Offset    int32
+	Limit  int32
+	Offset int32
 }
 
 func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error) {
-	rows, err := q.db.Query(ctx, listEntries, arg.AccountID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listEntries, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +77,51 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 		var i Entry
 		if err := rows.Scan(
 			&i.ID,
+			&i.Name,
+			&i.Note,
+			&i.AccountID,
+			&i.CategoryID,
+			&i.Amount,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listEntriesByAccountID = `-- name: ListEntriesByAccountID :many
+SELECT id, name, note, account_id, category_id, amount, created_at
+  FROM entries
+ WHERE account_id = $1
+ ORDER BY id DESC
+ LIMIT $2
+ OFFSET $3
+`
+
+type ListEntriesByAccountIDParams struct {
+	AccountID int64
+	Limit     int32
+	Offset    int32
+}
+
+func (q *Queries) ListEntriesByAccountID(ctx context.Context, arg ListEntriesByAccountIDParams) ([]Entry, error) {
+	rows, err := q.db.Query(ctx, listEntriesByAccountID, arg.AccountID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Entry
+	for rows.Next() {
+		var i Entry
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Note,
 			&i.AccountID,
 			&i.CategoryID,
 			&i.Amount,

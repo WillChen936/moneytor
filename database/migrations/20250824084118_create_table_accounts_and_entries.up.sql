@@ -11,6 +11,8 @@ ALTER TABLE accounts ADD FOREIGN KEY (currency_id) REFERENCES currencies (id);
 
 CREATE TABLE entries (
   id            bigint          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  name          text            NOT NULL,
+  note          text            NOT NULL DEFAULT '',
   account_id    bigint          NOT NULL,
   category_id   integer         NOT NULL,
   amount        numeric(19,6)   NOT NULL,

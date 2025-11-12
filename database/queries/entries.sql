@@ -1,14 +1,23 @@
 -- name: CreateEntry :one
 INSERT INTO entries (
-     account_id  
+     name
+    ,note
+    ,account_id  
     ,category_id 
     ,amount      
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4, $5
 )
 RETURNING *;
 
 -- name: ListEntries :many
+SELECT *
+  FROM entries
+ ORDER BY id DESC
+ LIMIT $1
+ OFFSET $2;
+
+-- name: ListEntriesByAccountID :many
 SELECT *
   FROM entries
  WHERE account_id = $1

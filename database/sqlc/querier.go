@@ -21,6 +21,7 @@ type Querier interface {
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListCurrencies(ctx context.Context) ([]Currency, error)
 	ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error)
+	ListEntriesByAccountID(ctx context.Context, arg ListEntriesByAccountIDParams) ([]Entry, error)
 	ListTransactionTypes(ctx context.Context) ([]TransactionType, error)
 	UpdateAccountBalance(ctx context.Context, arg UpdateAccountBalanceParams) (Account, error)
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error)
