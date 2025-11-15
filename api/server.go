@@ -25,6 +25,8 @@ func NewServer(queries db.Querier) *Server {
 	v1Routes.POST("categories", server.createCategory)
 	v1Routes.GET("categories", server.listCategories)
 	v1Routes.GET("transaction-types", server.listTransactionTypes)
+	v1Routes.POST("entries", server.createEntry)
+	v1Routes.GET("entries", server.getEntries)
 
 	server.router = router
 	return server
