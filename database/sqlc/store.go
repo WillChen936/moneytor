@@ -9,6 +9,7 @@ import (
 
 type Store interface {
 	Querier
+	CreateEntryTx(ctx context.Context, arg CreateEntryTxParams) (CreateEntryTxResult, error)
 }
 
 type SQLStore struct {
@@ -32,7 +33,7 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 	q := New(tx)
 	err = fn(q)
 	if err != nil {
-		if rollbackErr := tx.Rollback(ctx); err != nil {
+		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil {
 			return fmt.Errorf("tx err: %v, rollback err :%v", err, rollbackErr)
 		}
 		return err
