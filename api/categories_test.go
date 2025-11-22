@@ -22,7 +22,7 @@ func TestCreateCategory(t *testing.T) {
 	testCases := []struct {
 		Name          string
 		requestBody   gin.H
-		buildStub     func(mockQuerier *mockdb.MockQuerier)
+		buildStub     func(mockQuerier *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -31,7 +31,7 @@ func TestCreateCategory(t *testing.T) {
 				"name":              category.Name,
 				"transactionTypeId": category.TransactionTypeID,
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
@@ -49,7 +49,7 @@ func TestCreateCategory(t *testing.T) {
 				"name":              category.Name,
 				"transactionTypeId": -1,
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				mockQuerier.EXPECT().CreateCategory(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -62,7 +62,7 @@ func TestCreateCategory(t *testing.T) {
 				"name":              category.Name,
 				"transactionTypeId": category.TransactionTypeID,
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
@@ -80,7 +80,7 @@ func TestCreateCategory(t *testing.T) {
 				"name":              category.Name,
 				"transactionTypeId": category.TransactionTypeID,
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
@@ -98,7 +98,7 @@ func TestCreateCategory(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockQuerier := mockdb.NewMockQuerier(ctrl)
+		mockQuerier := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockQuerier)
 
 		server := NewServer(mockQuerier)
@@ -125,13 +125,13 @@ func TestListCategory(t *testing.T) {
 	testCases := []struct {
 		Name          string
 		Queries       map[string]string
-		buildStub     func(mockQuerier *mockdb.MockQuerier)
+		buildStub     func(mockQuerier *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			Name:    "OK_WithoutParams",
 			Queries: map[string]string{},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				mockQuerier.EXPECT().ListCategories(gomock.Any(), gomock.Any()).Times(1).Return(categories, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -144,7 +144,7 @@ func TestListCategory(t *testing.T) {
 				"page_id":   "3",
 				"page_size": "10",
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				arg := db.ListCategoriesParams{
 					Limit:  10,
 					Offset: 20,
@@ -161,7 +161,7 @@ func TestListCategory(t *testing.T) {
 				"page_id":   "-1",
 				"page_size": "10",
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				mockQuerier.EXPECT().ListCategories(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -174,7 +174,7 @@ func TestListCategory(t *testing.T) {
 				"page_id":   "3",
 				"page_size": "10",
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				arg := db.ListCategoriesParams{
 					Limit:  10,
 					Offset: 20,
@@ -192,7 +192,7 @@ func TestListCategory(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockQuerier := mockdb.NewMockQuerier(ctrl)
+		mockQuerier := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockQuerier)
 
 		server := NewServer(mockQuerier)

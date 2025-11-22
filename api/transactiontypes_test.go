@@ -22,12 +22,12 @@ func TestListTransactionType(t *testing.T) {
 	testCases := []struct {
 		Name          string
 		Queries       map[string]string
-		buildStub     func(mockQuerier *mockdb.MockQuerier)
+		buildStub     func(mockQuerier *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			Name: "OK",
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				mockQuerier.EXPECT().ListTransactionTypes(gomock.Any()).Times(1).Return(transactionTypes, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -36,7 +36,7 @@ func TestListTransactionType(t *testing.T) {
 		},
 		{
 			Name: "InternalError",
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				mockQuerier.EXPECT().ListTransactionTypes(gomock.Any()).Times(1).Return([]db.TransactionType{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -49,7 +49,7 @@ func TestListTransactionType(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockQuerier := mockdb.NewMockQuerier(ctrl)
+		mockQuerier := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockQuerier)
 
 		server := NewServer(mockQuerier)

@@ -7,7 +7,7 @@ import (
 )
 
 func (server *Server) listCurrencies(ctx *gin.Context) {
-	currencies, err := server.queries.ListCurrencies(ctx)
+	currencies, err := server.store.ListCurrencies(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return

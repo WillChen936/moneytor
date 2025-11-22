@@ -26,7 +26,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		Balance:    req.InitialBalance.Decimal,
 	}
 
-	account, err := server.queries.CreateAccount(ctx, arg)
+	account, err := server.store.CreateAccount(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return

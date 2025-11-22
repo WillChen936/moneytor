@@ -23,7 +23,7 @@ sqlc:
 	sqlc generate
 
 mockdb:
-	mockgen -source=database/sqlc/querier.go -destination=database/mocks/mock_querier.go -package=mockdb
+	mockgen -source=database/sqlc/store.go -destination=database/mocks/store.go -package=mockdb
 
 # Tests
 test:

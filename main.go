@@ -32,9 +32,9 @@ func main() {
 
 	defer connPool.Close()
 
-	queries := db.New(connPool)
+	store := db.NewStore(connPool)
 
-	server := api.NewServer(queries)
+	server := api.NewServer(store)
 
 	if err := server.Start(config.HttpServerAddress); err != nil {
 		log.Fatal().Err(err).Msg("Unable to start server")

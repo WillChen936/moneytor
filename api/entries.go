@@ -30,7 +30,7 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		Amount:     req.Amount.Decimal,
 	}
 
-	entry, err := server.queries.CreateEntry(ctx, arg)
+	entry, err := server.store.CreateEntry(ctx, arg)
 	if err != nil {
 		if db.ErrorCode(err) == db.ForeignKeyViolation {
 			ctx.JSON(http.StatusUnprocessableEntity, errResponse(err))
@@ -65,7 +65,7 @@ func (server *Server) getEntries(ctx *gin.Context) {
 			Offset: offset,
 		}
 
-		entries, err = server.queries.ListEntries(ctx, arg)
+		entries, err = server.store.ListEntries(ctx, arg)
 	} else {
 		arg := db.ListEntriesByAccountIDParams{
 			AccountID: req.AccountID,
@@ -73,7 +73,7 @@ func (server *Server) getEntries(ctx *gin.Context) {
 			Offset:    offset,
 		}
 
-		entries, err = server.queries.ListEntriesByAccountID(ctx, arg)
+		entries, err = server.store.ListEntriesByAccountID(ctx, arg)
 	}
 
 	if err != nil {

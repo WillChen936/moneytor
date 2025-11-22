@@ -23,7 +23,7 @@ func TestCreateAccount(t *testing.T) {
 	testCases := []struct {
 		name          string
 		requestBody   gin.H
-		buildStub     func(mockQuerier *mockdb.MockQuerier)
+		buildStub     func(mockQuerier *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -33,7 +33,7 @@ func TestCreateAccount(t *testing.T) {
 				"currencyId":     account.CurrencyID,
 				"initialBalance": account.Balance.String(),
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				arg := db.CreateAccountParams{
 					Name:       account.Name,
 					CurrencyID: account.CurrencyID,
@@ -53,7 +53,7 @@ func TestCreateAccount(t *testing.T) {
 				"currencyId":     -1,
 				"initialBalance": account.Balance.String(),
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				mockQuerier.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -67,7 +67,7 @@ func TestCreateAccount(t *testing.T) {
 				"currencyId":     account.CurrencyID,
 				"initialBalance": account.Balance.String(),
 			},
-			buildStub: func(mockQuerier *mockdb.MockQuerier) {
+			buildStub: func(mockQuerier *mockdb.MockStore) {
 				mockQuerier.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(1).Return(db.Account{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -80,7 +80,7 @@ func TestCreateAccount(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockQuerier := mockdb.NewMockQuerier(ctrl)
+		mockQuerier := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockQuerier)
 
 		server := NewServer(mockQuerier)

@@ -7,7 +7,7 @@ import (
 )
 
 func (server *Server) listTransactionTypes(ctx *gin.Context) {
-	transcationTypes, err := server.queries.ListTransactionTypes(ctx)
+	transcationTypes, err := server.store.ListTransactionTypes(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return

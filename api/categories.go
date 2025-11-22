@@ -25,7 +25,7 @@ func (server *Server) createCategory(ctx *gin.Context) {
 		TransactionTypeID: req.TransactionTypeID,
 	}
 
-	category, err := server.queries.CreateCategory(ctx, arg)
+	category, err := server.store.CreateCategory(ctx, arg)
 	if err != nil {
 		if db.ErrorCode(err) == db.ForeignKeyViolation {
 			ctx.JSON(http.StatusUnprocessableEntity, errResponse(errors.New("transaction type not found")))
@@ -55,7 +55,7 @@ func (server *Server) listCategories(ctx *gin.Context) {
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	category, err := server.queries.ListCategories(ctx, arg)
+	category, err := server.store.ListCategories(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
