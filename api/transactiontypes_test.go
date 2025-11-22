@@ -22,13 +22,13 @@ func TestListTransactionType(t *testing.T) {
 	testCases := []struct {
 		Name          string
 		Queries       map[string]string
-		buildStub     func(mockQuerier *mockdb.MockStore)
+		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			Name: "OK",
-			buildStub: func(mockQuerier *mockdb.MockStore) {
-				mockQuerier.EXPECT().ListTransactionTypes(gomock.Any()).Times(1).Return(transactionTypes, nil)
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().ListTransactionTypes(gomock.Any()).Times(1).Return(transactionTypes, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -36,8 +36,8 @@ func TestListTransactionType(t *testing.T) {
 		},
 		{
 			Name: "InternalError",
-			buildStub: func(mockQuerier *mockdb.MockStore) {
-				mockQuerier.EXPECT().ListTransactionTypes(gomock.Any()).Times(1).Return([]db.TransactionType{}, sql.ErrConnDone)
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().ListTransactionTypes(gomock.Any()).Times(1).Return([]db.TransactionType{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -49,10 +49,10 @@ func TestListTransactionType(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockQuerier := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockQuerier)
+		mockStore := mockdb.NewMockStore(ctrl)
+		testCase.buildStub(mockStore)
 
-		server := NewServer(mockQuerier)
+		server := NewServer(mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/transaction-types", nil)

@@ -22,7 +22,7 @@ func TestCreateCategory(t *testing.T) {
 	testCases := []struct {
 		Name          string
 		requestBody   gin.H
-		buildStub     func(mockQuerier *mockdb.MockStore)
+		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -31,13 +31,13 @@ func TestCreateCategory(t *testing.T) {
 				"name":              category.Name,
 				"transactionTypeId": category.TransactionTypeID,
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
+			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
 				}
 
-				mockQuerier.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(category, nil)
+				mockStore.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(category, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -49,8 +49,8 @@ func TestCreateCategory(t *testing.T) {
 				"name":              category.Name,
 				"transactionTypeId": -1,
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
-				mockQuerier.EXPECT().CreateCategory(gomock.Any(), gomock.Any()).Times(0)
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateCategory(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -62,13 +62,13 @@ func TestCreateCategory(t *testing.T) {
 				"name":              category.Name,
 				"transactionTypeId": category.TransactionTypeID,
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
+			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
 				}
 
-				mockQuerier.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.Category{}, db.ErrForeignKeyViolation)
+				mockStore.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.Category{}, db.ErrForeignKeyViolation)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
@@ -80,13 +80,13 @@ func TestCreateCategory(t *testing.T) {
 				"name":              category.Name,
 				"transactionTypeId": category.TransactionTypeID,
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
+			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
 				}
 
-				mockQuerier.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.Category{}, sql.ErrConnDone)
+				mockStore.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.Category{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -98,10 +98,10 @@ func TestCreateCategory(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockQuerier := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockQuerier)
+		mockStore := mockdb.NewMockStore(ctrl)
+		testCase.buildStub(mockStore)
 
-		server := NewServer(mockQuerier)
+		server := NewServer(mockStore)
 
 		data, err := json.Marshal(testCase.requestBody)
 		require.NoError(t, err)
@@ -125,14 +125,14 @@ func TestListCategory(t *testing.T) {
 	testCases := []struct {
 		Name          string
 		Queries       map[string]string
-		buildStub     func(mockQuerier *mockdb.MockStore)
+		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			Name:    "OK_WithoutParams",
 			Queries: map[string]string{},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
-				mockQuerier.EXPECT().ListCategories(gomock.Any(), gomock.Any()).Times(1).Return(categories, nil)
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().ListCategories(gomock.Any(), gomock.Any()).Times(1).Return(categories, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -144,12 +144,12 @@ func TestListCategory(t *testing.T) {
 				"page_id":   "3",
 				"page_size": "10",
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
+			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListCategoriesParams{
 					Limit:  10,
 					Offset: 20,
 				}
-				mockQuerier.EXPECT().ListCategories(gomock.Any(), gomock.Eq(arg)).Times(1).Return(categories, nil)
+				mockStore.EXPECT().ListCategories(gomock.Any(), gomock.Eq(arg)).Times(1).Return(categories, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -161,8 +161,8 @@ func TestListCategory(t *testing.T) {
 				"page_id":   "-1",
 				"page_size": "10",
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
-				mockQuerier.EXPECT().ListCategories(gomock.Any(), gomock.Any()).Times(0)
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().ListCategories(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -174,13 +174,13 @@ func TestListCategory(t *testing.T) {
 				"page_id":   "3",
 				"page_size": "10",
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
+			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListCategoriesParams{
 					Limit:  10,
 					Offset: 20,
 				}
 
-				mockQuerier.EXPECT().ListCategories(gomock.Any(), gomock.Eq(arg)).Times(1).Return([]db.Category{}, sql.ErrConnDone)
+				mockStore.EXPECT().ListCategories(gomock.Any(), gomock.Eq(arg)).Times(1).Return([]db.Category{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -192,10 +192,10 @@ func TestListCategory(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockQuerier := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockQuerier)
+		mockStore := mockdb.NewMockStore(ctrl)
+		testCase.buildStub(mockStore)
 
-		server := NewServer(mockQuerier)
+		server := NewServer(mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/categories", nil)

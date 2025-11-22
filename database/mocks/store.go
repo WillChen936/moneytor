@@ -86,6 +86,21 @@ func (mr *MockStoreMockRecorder) CreateEntry(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEntry", reflect.TypeOf((*MockStore)(nil).CreateEntry), ctx, arg)
 }
 
+// CreateEntryTx mocks base method.
+func (m *MockStore) CreateEntryTx(ctx context.Context, arg db.CreateEntryTxParams) (db.CreateEntryTxResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateEntryTx", ctx, arg)
+	ret0, _ := ret[0].(db.CreateEntryTxResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateEntryTx indicates an expected call of CreateEntryTx.
+func (mr *MockStoreMockRecorder) CreateEntryTx(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEntryTx", reflect.TypeOf((*MockStore)(nil).CreateEntryTx), ctx, arg)
+}
+
 // DeleteAccount mocks base method.
 func (m *MockStore) DeleteAccount(ctx context.Context, id int64) error {
 	m.ctrl.T.Helper()
@@ -157,6 +172,21 @@ func (m *MockStore) GetCurrency(ctx context.Context, id int16) (db.Currency, err
 func (mr *MockStoreMockRecorder) GetCurrency(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrency", reflect.TypeOf((*MockStore)(nil).GetCurrency), ctx, id)
+}
+
+// GetEntry mocks base method.
+func (m *MockStore) GetEntry(ctx context.Context, id int64) (db.Entry, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEntry", ctx, id)
+	ret0, _ := ret[0].(db.Entry)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEntry indicates an expected call of GetEntry.
+func (mr *MockStoreMockRecorder) GetEntry(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEntry", reflect.TypeOf((*MockStore)(nil).GetEntry), ctx, id)
 }
 
 // GetTransactionType mocks base method.

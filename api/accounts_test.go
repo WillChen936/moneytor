@@ -23,7 +23,7 @@ func TestCreateAccount(t *testing.T) {
 	testCases := []struct {
 		name          string
 		requestBody   gin.H
-		buildStub     func(mockQuerier *mockdb.MockStore)
+		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -33,14 +33,14 @@ func TestCreateAccount(t *testing.T) {
 				"currencyId":     account.CurrencyID,
 				"initialBalance": account.Balance.String(),
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
+			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateAccountParams{
 					Name:       account.Name,
 					CurrencyID: account.CurrencyID,
 					Balance:    account.Balance,
 				}
 
-				mockQuerier.EXPECT().CreateAccount(gomock.Any(), eqCreateAccountParams(arg)).Times(1).Return(account, nil)
+				mockStore.EXPECT().CreateAccount(gomock.Any(), eqCreateAccountParams(arg)).Times(1).Return(account, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -53,8 +53,8 @@ func TestCreateAccount(t *testing.T) {
 				"currencyId":     -1,
 				"initialBalance": account.Balance.String(),
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
-				mockQuerier.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -67,8 +67,8 @@ func TestCreateAccount(t *testing.T) {
 				"currencyId":     account.CurrencyID,
 				"initialBalance": account.Balance.String(),
 			},
-			buildStub: func(mockQuerier *mockdb.MockStore) {
-				mockQuerier.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(1).Return(db.Account{}, sql.ErrConnDone)
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(1).Return(db.Account{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -80,10 +80,10 @@ func TestCreateAccount(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockQuerier := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockQuerier)
+		mockStore := mockdb.NewMockStore(ctrl)
+		testCase.buildStub(mockStore)
 
-		server := NewServer(mockQuerier)
+		server := NewServer(mockStore)
 
 		data, err := json.Marshal(testCase.requestBody)
 		require.NoError(t, err)
