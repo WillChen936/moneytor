@@ -32,7 +32,7 @@ func (store *SQLStore) CreateEntryTx(ctx context.Context, arg CreateEntryTxParam
 
 		result.Account, err = q.UpdateAccountBalance(ctx, UpdateAccountBalanceParams{
 			ID:     arg.AccountID,
-			Amount: arg.Amount.Neg(),
+			Amount: arg.Amount,
 		})
 		if err != nil {
 			return err

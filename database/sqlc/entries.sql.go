@@ -53,6 +53,28 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
 	return i, err
 }
 
+const getEntry = `-- name: GetEntry :one
+SELECT id, name, note, account_id, category_id, amount, created_at
+  FROM entries
+ WHERE id = $1
+ LIMIT 1
+`
+
+func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
+	row := q.db.QueryRow(ctx, getEntry, id)
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Note,
+		&i.AccountID,
+		&i.CategoryID,
+		&i.Amount,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const listEntries = `-- name: ListEntries :many
 SELECT id, name, note, account_id, category_id, amount, created_at
   FROM entries
