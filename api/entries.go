@@ -22,7 +22,7 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.CreateEntryParams{
+	arg := db.CreateEntryTxParams{
 		Name:       req.Name,
 		Note:       req.Note,
 		AccountID:  req.AccountID,
@@ -30,7 +30,7 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		Amount:     req.Amount.Decimal,
 	}
 
-	entry, err := server.store.CreateEntry(ctx, arg)
+	result, err := server.store.CreateEntryTx(ctx, arg)
 	if err != nil {
 		if db.ErrorCode(err) == db.ForeignKeyViolation {
 			ctx.JSON(http.StatusUnprocessableEntity, errResponse(err))
@@ -40,7 +40,7 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, entry)
+	ctx.JSON(http.StatusOK, result)
 }
 
 type getEntriesRequest struct {
