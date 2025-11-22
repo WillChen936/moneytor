@@ -12,15 +12,13 @@ import (
 )
 
 func TestCreateCategory(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	RandomCategory(t, testQueries)
+	RandomCategory(t, testStore)
 }
 
 func TestGetCategory(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	category := RandomCategory(t, testQueries)
+	category := RandomCategory(t, testStore)
 
-	categoryGet, err := testQueries.GetCategory(context.Background(), category.ID)
+	categoryGet, err := testStore.GetCategory(context.Background(), category.ID)
 
 	require.NoError(t, err)
 	require.Equal(t, category.ID, categoryGet.ID)
@@ -31,9 +29,8 @@ func TestGetCategory(t *testing.T) {
 }
 
 func TestListCategories(t *testing.T) {
-	testQueries := setupTestQueries(t)
 	for i := 0; i < 10; i++ {
-		RandomCategory(t, testQueries)
+		RandomCategory(t, testStore)
 	}
 
 	limit := int32(5)
@@ -44,7 +41,7 @@ func TestListCategories(t *testing.T) {
 		Offset: offset,
 	}
 
-	categories, err := testQueries.ListCategories(context.Background(), arg)
+	categories, err := testStore.ListCategories(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, categories)
@@ -53,8 +50,7 @@ func TestListCategories(t *testing.T) {
 
 func TestUpdateCategory(t *testing.T) {
 	t.Run("UpdateOnlyName", func(t *testing.T) {
-		testQueries := setupTestQueries(t)
-		category := RandomCategory(t, testQueries)
+		category := RandomCategory(t, testStore)
 
 		newName := utils.RandomString(6)
 
@@ -69,7 +65,7 @@ func TestUpdateCategory(t *testing.T) {
 			},
 		}
 
-		categoryUpdated, err := testQueries.UpdateCategory(context.Background(), arg)
+		categoryUpdated, err := testStore.UpdateCategory(context.Background(), arg)
 
 		require.NoError(t, err)
 		require.NotEmpty(t, categoryUpdated)
@@ -82,8 +78,7 @@ func TestUpdateCategory(t *testing.T) {
 	})
 
 	t.Run("UpdateOnlyTransactionID", func(t *testing.T) {
-		testQueries := setupTestQueries(t)
-		category := RandomCategory(t, testQueries)
+		category := RandomCategory(t, testStore)
 
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
 
@@ -98,7 +93,7 @@ func TestUpdateCategory(t *testing.T) {
 			},
 		}
 
-		categoryUpdated, err := testQueries.UpdateCategory(context.Background(), arg)
+		categoryUpdated, err := testStore.UpdateCategory(context.Background(), arg)
 
 		require.NoError(t, err)
 		require.NotEmpty(t, categoryUpdated)
@@ -111,8 +106,7 @@ func TestUpdateCategory(t *testing.T) {
 	})
 
 	t.Run("UpdateAll", func(t *testing.T) {
-		testQueries := setupTestQueries(t)
-		category := RandomCategory(t, testQueries)
+		category := RandomCategory(t, testStore)
 
 		newName := utils.RandomString(6)
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
@@ -129,7 +123,7 @@ func TestUpdateCategory(t *testing.T) {
 			},
 		}
 
-		categoryUpdated, err := testQueries.UpdateCategory(context.Background(), arg)
+		categoryUpdated, err := testStore.UpdateCategory(context.Background(), arg)
 
 		require.NoError(t, err)
 		require.NotEmpty(t, categoryUpdated)
@@ -143,11 +137,10 @@ func TestUpdateCategory(t *testing.T) {
 }
 
 func TestDeleteCategory(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	category := RandomCategory(t, testQueries)
+	category := RandomCategory(t, testStore)
 
-	errDelete := testQueries.DeleteCategory(context.Background(), category.ID)
-	categoryGet, errGet := testQueries.GetCategory(context.Background(), category.ID)
+	errDelete := testStore.DeleteCategory(context.Background(), category.ID)
+	categoryGet, errGet := testStore.GetCategory(context.Background(), category.ID)
 
 	require.NoError(t, errDelete)
 	require.Error(t, errGet)
@@ -155,15 +148,15 @@ func TestDeleteCategory(t *testing.T) {
 	require.Empty(t, categoryGet)
 }
 
-func RandomCategory(t *testing.T, testQueries *Queries) Category {
-	transactionType := RandomTransactionType(t, testQueries)
+func RandomCategory(t *testing.T, testStore Store) Category {
+	transactionType := RandomTransactionType(t, testStore)
 
 	arg := CreateCategoryParams{
 		Name:              utils.RandomString(6),
 		TransactionTypeID: transactionType.ID,
 	}
 
-	category, err := testQueries.CreateCategory(context.Background(), arg)
+	category, err := testStore.CreateCategory(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotZero(t, category.ID)

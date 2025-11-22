@@ -9,17 +9,15 @@ import (
 )
 
 func TestCreatEntry(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	account := RandomAccount(t, testQueries)
-	RandomEntry(t, testQueries, account.ID)
+	account := RandomAccount(t, testStore)
+	RandomEntry(t, testStore, account.ID)
 }
 
 func TestListEntries(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	account := RandomAccount(t, testQueries)
+	account := RandomAccount(t, testStore)
 
 	for i := 0; i < 10; i++ {
-		RandomEntry(t, testQueries, account.ID)
+		RandomEntry(t, testStore, account.ID)
 	}
 
 	arg := ListEntriesParams{
@@ -27,7 +25,7 @@ func TestListEntries(t *testing.T) {
 		Offset: 1,
 	}
 
-	entries, err := testQueries.ListEntries(context.Background(), arg)
+	entries, err := testStore.ListEntries(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, entries)
@@ -39,13 +37,12 @@ func TestListEntries(t *testing.T) {
 }
 
 func TestListEntriesByAccountID(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	account1 := RandomAccount(t, testQueries)
-	account2 := RandomAccount(t, testQueries)
+	account1 := RandomAccount(t, testStore)
+	account2 := RandomAccount(t, testStore)
 
 	for i := 0; i < 10; i++ {
-		RandomEntry(t, testQueries, account1.ID)
-		RandomEntry(t, testQueries, account2.ID)
+		RandomEntry(t, testStore, account1.ID)
+		RandomEntry(t, testStore, account2.ID)
 	}
 
 	arg := ListEntriesByAccountIDParams{
@@ -54,7 +51,7 @@ func TestListEntriesByAccountID(t *testing.T) {
 		Offset:    1,
 	}
 
-	entries, err := testQueries.ListEntriesByAccountID(context.Background(), arg)
+	entries, err := testStore.ListEntriesByAccountID(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, entries)
@@ -66,8 +63,8 @@ func TestListEntriesByAccountID(t *testing.T) {
 	}
 }
 
-func RandomEntry(t *testing.T, testQueries *Queries, accountID int64) Entry {
-	category := RandomCategory(t, testQueries)
+func RandomEntry(t *testing.T, testStore Store, accountID int64) Entry {
+	category := RandomCategory(t, testStore)
 
 	arg := CreateEntryParams{
 		Name:       utils.RandomString(10),
@@ -77,7 +74,7 @@ func RandomEntry(t *testing.T, testQueries *Queries, accountID int64) Entry {
 		Amount:     utils.RandomDecimalRange(100, 10000, 2),
 	}
 
-	entry, err := testQueries.CreateEntry(context.Background(), arg)
+	entry, err := testStore.CreateEntry(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, entry.ID)

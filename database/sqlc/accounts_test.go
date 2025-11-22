@@ -12,15 +12,13 @@ import (
 )
 
 func TestCreateAccount(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	RandomAccount(t, testQueries)
+	RandomAccount(t, testStore)
 }
 
 func TestGetAccount(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	account := RandomAccount(t, testQueries)
+	account := RandomAccount(t, testStore)
 
-	accountGet, err := testQueries.GetAccount(context.Background(), account.ID)
+	accountGet, err := testStore.GetAccount(context.Background(), account.ID)
 
 	require.NoError(t, err)
 	require.Equal(t, account.ID, accountGet.ID)
@@ -31,8 +29,7 @@ func TestGetAccount(t *testing.T) {
 }
 
 func TestUpdateAccountBalance(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	account := RandomAccount(t, testQueries)
+	account := RandomAccount(t, testStore)
 
 	amount, err := decimal.NewFromString("12.34")
 	require.NoError(t, err)
@@ -42,7 +39,7 @@ func TestUpdateAccountBalance(t *testing.T) {
 		Amount: amount,
 	}
 
-	accountUpdated, err := testQueries.UpdateAccountBalance(context.Background(), arg)
+	accountUpdated, err := testStore.UpdateAccountBalance(context.Background(), arg)
 	expectedAmount := account.Balance.Add(amount)
 
 	require.NoError(t, err)
@@ -57,11 +54,10 @@ func TestUpdateAccountBalance(t *testing.T) {
 }
 
 func TestDeleteAccount(t *testing.T) {
-	testQueries := setupTestQueries(t)
-	account := RandomAccount(t, testQueries)
+	account := RandomAccount(t, testStore)
 
-	errDelete := testQueries.DeleteAccount(context.Background(), account.ID)
-	accountGet, errGet := testQueries.GetAccount(context.Background(), account.ID)
+	errDelete := testStore.DeleteAccount(context.Background(), account.ID)
+	accountGet, errGet := testStore.GetAccount(context.Background(), account.ID)
 
 	require.NoError(t, errDelete)
 	require.Error(t, errGet)
@@ -69,14 +65,14 @@ func TestDeleteAccount(t *testing.T) {
 	require.Empty(t, accountGet)
 }
 
-func RandomAccount(t *testing.T, testQueries *Queries) Account {
+func RandomAccount(t *testing.T, testStore Store) Account {
 	arg := CreateAccountParams{
 		Name:       utils.RandomString(6),
-		CurrencyID: RandomCurrency(t, testQueries).ID,
+		CurrencyID: RandomCurrency(t, testStore).ID,
 		Balance:    utils.RandomDecimalRange(100, 10000, 2),
 	}
 
-	account, err := testQueries.CreateAccount(context.Background(), arg)
+	account, err := testStore.CreateAccount(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, account.ID)
