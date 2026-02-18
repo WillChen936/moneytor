@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
 )
 
@@ -15,28 +16,31 @@ const createEntry = `-- name: CreateEntry :one
 INSERT INTO entries (
      name
     ,note
-    ,account_id  
+    ,from_account_id  
+    ,to_account_id  
     ,category_id 
     ,amount      
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4, $5, $6
 )
-RETURNING id, name, note, account_id, category_id, amount, created_at
+RETURNING id, name, note, from_account_id, to_account_id, category_id, amount, created_at
 `
 
 type CreateEntryParams struct {
-	Name       string
-	Note       string
-	AccountID  int64
-	CategoryID int64
-	Amount     decimal.Decimal
+	Name          string
+	Note          string
+	FromAccountID int64
+	ToAccountID   pgtype.Int8
+	CategoryID    int64
+	Amount        decimal.Decimal
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
 	row := q.db.QueryRow(ctx, createEntry,
 		arg.Name,
 		arg.Note,
-		arg.AccountID,
+		arg.FromAccountID,
+		arg.ToAccountID,
 		arg.CategoryID,
 		arg.Amount,
 	)
@@ -45,7 +49,8 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
 		&i.ID,
 		&i.Name,
 		&i.Note,
-		&i.AccountID,
+		&i.FromAccountID,
+		&i.ToAccountID,
 		&i.CategoryID,
 		&i.Amount,
 		&i.CreatedAt,
@@ -54,7 +59,7 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
 }
 
 const getEntry = `-- name: GetEntry :one
-SELECT id, name, note, account_id, category_id, amount, created_at
+SELECT id, name, note, from_account_id, to_account_id, category_id, amount, created_at
   FROM entries
  WHERE id = $1
  LIMIT 1
@@ -67,7 +72,8 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
 		&i.ID,
 		&i.Name,
 		&i.Note,
-		&i.AccountID,
+		&i.FromAccountID,
+		&i.ToAccountID,
 		&i.CategoryID,
 		&i.Amount,
 		&i.CreatedAt,
@@ -76,7 +82,7 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
 }
 
 const listEntries = `-- name: ListEntries :many
-SELECT id, name, note, account_id, category_id, amount, created_at
+SELECT id, name, note, from_account_id, to_account_id, category_id, amount, created_at
   FROM entries
  ORDER BY id DESC
  LIMIT $1
@@ -101,7 +107,8 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 			&i.ID,
 			&i.Name,
 			&i.Note,
-			&i.AccountID,
+			&i.FromAccountID,
+			&i.ToAccountID,
 			&i.CategoryID,
 			&i.Amount,
 			&i.CreatedAt,
@@ -117,22 +124,22 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 }
 
 const listEntriesByAccountID = `-- name: ListEntriesByAccountID :many
-SELECT id, name, note, account_id, category_id, amount, created_at
+SELECT id, name, note, from_account_id, to_account_id, category_id, amount, created_at
   FROM entries
- WHERE account_id = $1
+ WHERE from_account_id = $3 OR to_account_id = $3
  ORDER BY id DESC
- LIMIT $2
- OFFSET $3
+ LIMIT $1
+ OFFSET $2
 `
 
 type ListEntriesByAccountIDParams struct {
-	AccountID int64
 	Limit     int32
 	Offset    int32
+	AccountID int64
 }
 
 func (q *Queries) ListEntriesByAccountID(ctx context.Context, arg ListEntriesByAccountIDParams) ([]Entry, error) {
-	rows, err := q.db.Query(ctx, listEntriesByAccountID, arg.AccountID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listEntriesByAccountID, arg.Limit, arg.Offset, arg.AccountID)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +151,8 @@ func (q *Queries) ListEntriesByAccountID(ctx context.Context, arg ListEntriesByA
 			&i.ID,
 			&i.Name,
 			&i.Note,
-			&i.AccountID,
+			&i.FromAccountID,
+			&i.ToAccountID,
 			&i.CategoryID,
 			&i.Amount,
 			&i.CreatedAt,

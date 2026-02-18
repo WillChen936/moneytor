@@ -34,13 +34,14 @@ type Currency struct {
 }
 
 type Entry struct {
-	ID         int64
-	Name       string
-	Note       string
-	AccountID  int64
-	CategoryID int64
-	Amount     decimal.Decimal
-	CreatedAt  time.Time
+	ID            int64
+	Name          string
+	Note          string
+	FromAccountID int64
+	ToAccountID   pgtype.Int8
+	CategoryID    int64
+	Amount        decimal.Decimal
+	CreatedAt     time.Time
 }
 
 type TransactionType struct {

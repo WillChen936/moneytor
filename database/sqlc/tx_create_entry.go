@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
 )
 
@@ -25,7 +26,14 @@ func (store *SQLStore) CreateEntryTx(ctx context.Context, arg CreateEntryTxParam
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		result.Entry, err = q.CreateEntry(ctx, CreateEntryParams(arg))
+		result.Entry, err = q.CreateEntry(ctx, CreateEntryParams{
+			Name:          arg.Name,
+			Note:          arg.Note,
+			FromAccountID: arg.AccountID,
+			ToAccountID:   pgtype.Int8{Valid: false},
+			CategoryID:    arg.CategoryID,
+			Amount:        arg.Amount,
+		})
 		if err != nil {
 			return err
 		}

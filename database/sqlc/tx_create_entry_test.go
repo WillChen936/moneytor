@@ -30,7 +30,7 @@ func TestCreateEntryTx(t *testing.T) {
 
 	require.Equal(t, entryCreated.Name, arg.Name)
 	require.Equal(t, entryCreated.Note, arg.Note)
-	require.Equal(t, entryCreated.AccountID, arg.AccountID)
+	require.Equal(t, entryCreated.FromAccountID, arg.AccountID)
 	require.Equal(t, entryCreated.CategoryID, arg.CategoryID)
 	require.True(t, entryCreated.Amount.Equal(arg.Amount))
 	require.True(t, amountUpdated.Balance.Equal(account.Balance.Add(amount)))

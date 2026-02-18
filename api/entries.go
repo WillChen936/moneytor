@@ -26,6 +26,7 @@ func (server *Server) createEntry(ctx *gin.Context) {
 	category, err := server.store.GetCategory(ctx, req.CategoryID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		return
 	}
 
 	var amount decimal.Decimal

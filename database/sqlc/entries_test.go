@@ -5,6 +5,7 @@ import (
 	"moneytor/utils"
 	"testing"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -59,7 +60,7 @@ func TestListEntriesByAccountID(t *testing.T) {
 
 	for _, entry := range entries {
 		require.NotEmpty(t, entry)
-		require.Equal(t, entry.AccountID, account2.ID)
+		require.Equal(t, entry.FromAccountID, account2.ID)
 	}
 }
 
@@ -67,11 +68,12 @@ func RandomEntry(t *testing.T, testStore Store, accountID int64) Entry {
 	category := RandomCategory(t, testStore)
 
 	arg := CreateEntryParams{
-		Name:       utils.RandomString(10),
-		Note:       utils.RandomString(30),
-		AccountID:  accountID,
-		CategoryID: category.ID,
-		Amount:     utils.RandomDecimalRange(100, 10000, 2),
+		Name:          utils.RandomString(10),
+		Note:          utils.RandomString(30),
+		FromAccountID: accountID,
+		ToAccountID:   pgtype.Int8{Valid: false},
+		CategoryID:    category.ID,
+		Amount:        utils.RandomDecimalRange(100, 10000, 2),
 	}
 
 	entry, err := testStore.CreateEntry(context.Background(), arg)
@@ -80,7 +82,8 @@ func RandomEntry(t *testing.T, testStore Store, accountID int64) Entry {
 	require.NotEmpty(t, entry.ID)
 	require.Equal(t, arg.Name, entry.Name)
 	require.Equal(t, arg.Note, entry.Note)
-	require.Equal(t, arg.AccountID, entry.AccountID)
+	require.Equal(t, arg.FromAccountID, entry.FromAccountID)
+	require.Equal(t, arg.ToAccountID, entry.ToAccountID)
 	require.Equal(t, arg.CategoryID, entry.CategoryID)
 	require.True(t, arg.Amount.Equal(entry.Amount))
 	require.NotEmpty(t, entry.CreatedAt)
