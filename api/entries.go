@@ -5,15 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shopspring/decimal"
 )
 
 type createEntryRequest struct {
-	Name       string  `json:"name" binding:"required,min=1,max=50"`
-	Note       string  `json:"note"`
-	AccountID  int64   `json:"accountId" binding:"required"`
-	CategoryID int64   `json:"categoryId" binding:"required"`
-	Amount     Decimal `json:"amount" binding:"required"`
+	Name       string `json:"name" binding:"required,min=1,max=50"`
+	Note       string `json:"note"`
+	AccountID  int64  `json:"accountId" binding:"required"`
+	CategoryID int64  `json:"categoryId" binding:"required"`
+	Amount     int64  `json:"amount" binding:"required"`
 }
 
 func (server *Server) createEntry(ctx *gin.Context) {
@@ -29,12 +28,12 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		return
 	}
 
-	var amount decimal.Decimal
+	var amount int64
 	switch category.TransactionTypeID {
 	case TransactionTypeExpense:
-		amount = req.Amount.Decimal.Neg()
+		amount = -req.Amount
 	case TransactionTypeIncome:
-		amount = req.Amount.Decimal
+		amount = req.Amount
 	}
 
 	arg := db.CreateEntryTxParams{

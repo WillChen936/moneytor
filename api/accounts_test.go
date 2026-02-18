@@ -29,9 +29,9 @@ func TestCreateAccount(t *testing.T) {
 		{
 			name: "OK",
 			requestBody: gin.H{
-				"name":           account.Name,
-				"currencyId":     account.CurrencyID,
-				"initialBalance": account.Balance.String(),
+				"name":       account.Name,
+				"currencyId": account.CurrencyID,
+				"balance":    account.Balance,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateAccountParams{
@@ -49,9 +49,9 @@ func TestCreateAccount(t *testing.T) {
 		{
 			name: "IlleagalCurrnecyID",
 			requestBody: gin.H{
-				"name":           account.Name,
-				"currencyId":     -1,
-				"initialBalance": account.Balance.String(),
+				"name":       account.Name,
+				"currencyId": -1,
+				"balance":    account.Balance,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
@@ -63,9 +63,9 @@ func TestCreateAccount(t *testing.T) {
 		{
 			name: "InternalError",
 			requestBody: gin.H{
-				"name":           account.Name,
-				"currencyId":     account.CurrencyID,
-				"initialBalance": account.Balance.String(),
+				"name":       account.Name,
+				"currencyId": account.CurrencyID,
+				"balance":    account.Balance,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(1).Return(db.Account{}, sql.ErrConnDone)
@@ -103,7 +103,7 @@ func createRandomAccount() db.Account {
 		ID:         utils.RandomInt64Range(1, 1000),
 		Name:       utils.RandomString(10),
 		CurrencyID: utils.RandomInt16Range(1, 10),
-		Balance:    utils.RandomDecimalRange(-1000, 1000, 2),
+		Balance:    utils.RandomInt64Range(-100, 100),
 	}
 }
 
@@ -123,10 +123,10 @@ func (e eqCreateAccountParamsMatcher) Matches(x any) bool {
 
 	return e.arg.Name == arg.Name &&
 		e.arg.CurrencyID == arg.CurrencyID &&
-		e.arg.Balance.Equal(arg.Balance)
+		e.arg.Balance == arg.Balance
 }
 
 func (e eqCreateAccountParamsMatcher) String() string {
-	return fmt.Sprintf("is equal to CreateAccountParams{Name=%s, CurrencyID=%d, Balance=%s}",
-		e.arg.Name, e.arg.CurrencyID, e.arg.Balance.String())
+	return fmt.Sprintf("is equal to CreateAccountParams{Name=%s, CurrencyID=%d, Balance=%d}",
+		e.arg.Name, e.arg.CurrencyID, e.arg.Balance)
 }
