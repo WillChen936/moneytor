@@ -8,14 +8,13 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/shopspring/decimal"
 )
 
 type Account struct {
 	ID         int64
 	Name       string
 	CurrencyID int16
-	Balance    decimal.Decimal
+	Balance    int64
 	CreatedAt  time.Time
 	UpdatedAt  pgtype.Timestamptz
 }
@@ -40,7 +39,7 @@ type Entry struct {
 	FromAccountID int64
 	ToAccountID   pgtype.Int8
 	CategoryID    int64
-	Amount        decimal.Decimal
+	Amount        int64
 	CreatedAt     time.Time
 }
 

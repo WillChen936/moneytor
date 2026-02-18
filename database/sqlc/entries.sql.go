@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/shopspring/decimal"
 )
 
 const createEntry = `-- name: CreateEntry :one
@@ -32,7 +31,7 @@ type CreateEntryParams struct {
 	FromAccountID int64
 	ToAccountID   pgtype.Int8
 	CategoryID    int64
-	Amount        decimal.Decimal
+	Amount        int64
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {

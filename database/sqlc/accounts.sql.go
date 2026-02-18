@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/shopspring/decimal"
 )
 
 const createAccount = `-- name: CreateAccount :one
@@ -25,7 +23,7 @@ RETURNING id, name, currency_id, balance, created_at, updated_at
 type CreateAccountParams struct {
 	Name       string
 	CurrencyID int16
-	Balance    decimal.Decimal
+	Balance    int64
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
@@ -83,7 +81,7 @@ RETURNING id, name, currency_id, balance, created_at, updated_at
 
 type UpdateAccountBalanceParams struct {
 	ID     int64
-	Amount decimal.Decimal
+	Amount int64
 }
 
 func (q *Queries) UpdateAccountBalance(ctx context.Context, arg UpdateAccountBalanceParams) (Account, error) {

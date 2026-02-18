@@ -73,7 +73,7 @@ func RandomEntry(t *testing.T, testStore Store, accountID int64) Entry {
 		FromAccountID: accountID,
 		ToAccountID:   pgtype.Int8{Valid: false},
 		CategoryID:    category.ID,
-		Amount:        utils.RandomDecimalRange(100, 10000, 2),
+		Amount:        utils.RandomInt64Range(100, 10000),
 	}
 
 	entry, err := testStore.CreateEntry(context.Background(), arg)
@@ -85,7 +85,7 @@ func RandomEntry(t *testing.T, testStore Store, accountID int64) Entry {
 	require.Equal(t, arg.FromAccountID, entry.FromAccountID)
 	require.Equal(t, arg.ToAccountID, entry.ToAccountID)
 	require.Equal(t, arg.CategoryID, entry.CategoryID)
-	require.True(t, arg.Amount.Equal(entry.Amount))
+	require.Equal(t, arg.Amount, entry.Amount)
 	require.NotEmpty(t, entry.CreatedAt)
 
 	return entry

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,8 +30,7 @@ func TestGetAccount(t *testing.T) {
 func TestUpdateAccountBalance(t *testing.T) {
 	account := RandomAccount(t, testStore)
 
-	amount, err := decimal.NewFromString("12.34")
-	require.NoError(t, err)
+	amount := utils.RandomInt64Range(-100, 100)
 
 	arg := UpdateAccountBalanceParams{
 		ID:     account.ID,
@@ -40,13 +38,13 @@ func TestUpdateAccountBalance(t *testing.T) {
 	}
 
 	accountUpdated, err := testStore.UpdateAccountBalance(context.Background(), arg)
-	expectedAmount := account.Balance.Add(amount)
+	expectedAmount := account.Balance + amount
 
 	require.NoError(t, err)
 	require.NotEmpty(t, accountUpdated)
 	require.Equal(t, account.ID, accountUpdated.ID)
 	require.Equal(t, account.Name, accountUpdated.Name)
-	require.True(t, expectedAmount.Equal(accountUpdated.Balance))
+	require.Equal(t, expectedAmount, accountUpdated.Balance)
 	require.Equal(t, account.CurrencyID, accountUpdated.CurrencyID)
 	require.WithinDuration(t, account.CreatedAt, accountUpdated.CreatedAt, time.Second)
 	require.True(t, accountUpdated.UpdatedAt.Valid)
@@ -69,7 +67,7 @@ func RandomAccount(t *testing.T, testStore Store) Account {
 	arg := CreateAccountParams{
 		Name:       utils.RandomString(6),
 		CurrencyID: RandomCurrency(t, testStore).ID,
-		Balance:    utils.RandomDecimalRange(100, 10000, 2),
+		Balance:    utils.RandomInt64Range(100, 10000),
 	}
 
 	account, err := testStore.CreateAccount(context.Background(), arg)
@@ -78,7 +76,7 @@ func RandomAccount(t *testing.T, testStore Store) Account {
 	require.NotEmpty(t, account.ID)
 	require.Equal(t, arg.Name, account.Name)
 	require.Equal(t, arg.CurrencyID, account.CurrencyID)
-	require.True(t, arg.Balance.Equal(account.Balance))
+	require.Equal(t, arg.Balance, account.Balance)
 	require.NotEmpty(t, account.CreatedAt)
 	require.False(t, account.UpdatedAt.Valid)
 

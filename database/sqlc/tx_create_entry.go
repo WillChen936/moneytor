@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/shopspring/decimal"
 )
 
 type CreateEntryTxParams struct {
@@ -12,7 +11,7 @@ type CreateEntryTxParams struct {
 	Note       string
 	AccountID  int64
 	CategoryID int64
-	Amount     decimal.Decimal
+	Amount     int64
 }
 
 type CreateEntryTxResult struct {

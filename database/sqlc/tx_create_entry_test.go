@@ -11,7 +11,7 @@ import (
 func TestCreateEntryTx(t *testing.T) {
 	ctx := context.Background()
 	account := RandomAccount(t, testStore)
-	amount := utils.RandomDecimalRange(100, 10000, 2).Neg()
+	amount := utils.RandomInt64Range(-100, 100)
 
 	arg := CreateEntryTxParams{
 		Name:       utils.RandomString(6),
@@ -32,6 +32,6 @@ func TestCreateEntryTx(t *testing.T) {
 	require.Equal(t, entryCreated.Note, arg.Note)
 	require.Equal(t, entryCreated.FromAccountID, arg.AccountID)
 	require.Equal(t, entryCreated.CategoryID, arg.CategoryID)
-	require.True(t, entryCreated.Amount.Equal(arg.Amount))
-	require.True(t, amountUpdated.Balance.Equal(account.Balance.Add(amount)))
+	require.Equal(t, entryCreated.Amount, arg.Amount)
+	require.Equal(t, amountUpdated.Balance, account.Balance+amount)
 }
