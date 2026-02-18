@@ -103,7 +103,7 @@ func createRandomAccount() db.Account {
 		ID:         utils.RandomInt64Range(1, 1000),
 		Name:       utils.RandomString(10),
 		CurrencyID: utils.RandomInt16Range(1, 10),
-		Balance:    utils.RandomInt64Range(-100, 100),
+		Balance:    utils.RandomInt64Range(1, 100),
 	}
 }
 
