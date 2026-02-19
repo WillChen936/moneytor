@@ -13,11 +13,11 @@ const (
 )
 
 func (server *Server) listTransactionTypes(ctx *gin.Context) {
-	transcationTypes, err := server.store.ListTransactionTypes(ctx)
+	transactionTypes, err := server.store.ListTransactionTypes(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, transcationTypes)
+	ctx.JSON(http.StatusOK, transactionTypes)
 }

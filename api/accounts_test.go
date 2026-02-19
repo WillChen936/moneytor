@@ -47,7 +47,7 @@ func TestCreateAccount(t *testing.T) {
 			},
 		},
 		{
-			name: "IlleagalCurrnecyID",
+			name: "IllegalCurrnecyID",
 			requestBody: gin.H{
 				"name":       account.Name,
 				"currencyId": -1,
