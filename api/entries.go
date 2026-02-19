@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	db "moneytor/database/sqlc"
 	"net/http"
 
@@ -28,12 +29,10 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		return
 	}
 
-	var amount int64
-	switch category.TransactionTypeID {
-	case TransactionTypeExpense:
-		amount = -req.Amount
-	case TransactionTypeIncome:
-		amount = req.Amount
+	amount, err := ResolverEntryAmount(category.TransactionTypeID, req.Amount)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		return
 	}
 
 	arg := db.CreateEntryTxParams{
@@ -96,4 +95,15 @@ func (server *Server) getEntries(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, entries)
+}
+
+func ResolverEntryAmount(transactionTypeID int16, rawAmount int64) (int64, error) {
+	switch transactionTypeID {
+	case TransactionTypeExpense:
+		return -1 * rawAmount, nil
+	case TransactionTypeIncome:
+		return 1 * rawAmount, nil
+	default:
+		return 0, fmt.Errorf("invalid transaction type: %d", transactionTypeID)
+	}
 }

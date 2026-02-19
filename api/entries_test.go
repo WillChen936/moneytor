@@ -31,11 +31,18 @@ func TestCreateEntry(t *testing.T) {
 		Name:              utils.RandomString(10),
 		TransactionTypeID: TransactionTypeExpense,
 	}
+	categoryTransfer := db.Category{
+		ID:                utils.RandomInt64Range(2001, 3000),
+		Name:              utils.RandomString(10),
+		TransactionTypeID: TransactionTypeTransfer,
+	}
 
 	entryIncome := createRandomEntry(account.ID, categoryIncome.ID)
 	entryIncome.Amount = amount
 	entryExpense := createRandomEntry(account.ID, categoryExpense.ID)
 	entryExpense.Amount = amount
+	entryTransfer := createRandomEntry(account.ID, categoryTransfer.ID)
+	entryTransfer.Amount = amount
 
 	testCases := []struct {
 		name          string
@@ -144,6 +151,23 @@ func TestCreateEntry(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
+			},
+		},
+		{
+			name: "InvalidTransactionTypeID",
+			requestBody: gin.H{
+				"name":       entryTransfer.Name,
+				"note":       entryTransfer.Note,
+				"accountId":  entryTransfer.FromAccountID,
+				"categoryId": entryTransfer.CategoryID,
+				"amount":     amount,
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetCategory(gomock.Any(), categoryTransfer.ID).Times(1).Return(categoryTransfer, nil)
+				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
 		},
 		{
