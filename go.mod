@@ -6,7 +6,6 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/rs/zerolog v1.34.0
-	github.com/shopspring/decimal v1.4.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.6.0
 )
