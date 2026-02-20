@@ -56,14 +56,14 @@ func (server *Server) createEntry(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
-type getEntriesRequest struct {
+type listEntriesRequest struct {
 	AccountID int64 `form:"account_id"`
 	PageID    int32 `form:"page_id,default=1" binding:"min=1"`
 	PageSize  int32 `form:"page_size,default=5" binding:"min=5,max=10"`
 }
 
-func (server *Server) getEntries(ctx *gin.Context) {
-	var req getEntriesRequest
+func (server *Server) listEntries(ctx *gin.Context) {
+	var req listEntriesRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return

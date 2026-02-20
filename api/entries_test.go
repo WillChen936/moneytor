@@ -218,7 +218,7 @@ func TestCreateEntry(t *testing.T) {
 	}
 }
 
-func TestGetEntries(t *testing.T) {
+func TestListEntries(t *testing.T) {
 	entries := []db.Entry{}
 	for i := 0; i < 5; i++ {
 		entries = append(entries, createRandomEntry(int64(i+1), int64(i+1)))

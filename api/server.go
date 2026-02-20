@@ -27,7 +27,7 @@ func NewServer(store db.Store) *Server {
 	v1Routes.GET("categories", server.listCategories)
 	v1Routes.GET("transaction-types", server.listTransactionTypes)
 	v1Routes.POST("entries", server.createEntry)
-	v1Routes.GET("entries", server.getEntries)
+	v1Routes.GET("entries", server.listEntries)
 	v1Routes.GET("currencies", server.listCurrencies)
 
 	server.router = router
