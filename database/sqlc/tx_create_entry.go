@@ -19,6 +19,8 @@ type CreateEntryTxResult struct {
 	Account Account
 }
 
+// CreateEntryTx creates an entry and updates the account balance (balance + amount).
+// Negative balance is allowed (e.g. credit card accounts may be overdrawn), so no CHECK (balance >= 0) is applied.
 func (store *SQLStore) CreateEntryTx(ctx context.Context, arg CreateEntryTxParams) (CreateEntryTxResult, error) {
 	var result CreateEntryTxResult
 

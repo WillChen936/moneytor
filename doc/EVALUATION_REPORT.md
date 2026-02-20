@@ -19,10 +19,7 @@
 
 ### 2. 帳戶餘額可能為負（`database/sqlc/tx_create_entry.go` + migrations）
 
-- **問題**：`UpdateAccountBalance` 為 `balance + amount`，支出時 `amount` 為負數，若餘額不足會產生負餘額；migrations 中沒有 `CHECK (balance >= 0)`
-- **建議**：
-  - 若業務不允許負餘額：在 `CreateEntryTx` 內先查詢帳戶餘額，若更新後會小於 0 則回傳業務錯誤（例如 422）；或是在 DB 加 `CHECK (balance >= 0)`
-  - 若允許透支：在文件或註解中說明
+- **Status (decided):**Negative balance is allowed (e.g. credit card accounts may be overdrawn). The reason for not adding `CHECK (balance >= 0)` is documented in the comment on `CreateEntryTx`; migrations remain without this constraint.
 
 ### 3. 建立 Entry 時未驗證金額正負（`api/entries.go`）
 

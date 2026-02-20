@@ -13,7 +13,7 @@ type createEntryRequest struct {
 	Note       string `json:"note"`
 	AccountID  int64  `json:"accountId" binding:"required"`
 	CategoryID int64  `json:"categoryId" binding:"required"`
-	Amount     int64  `json:"amount" binding:"required"`
+	Amount     int64  `json:"amount" binding:"required,gt=0"`
 }
 
 func (server *Server) createEntry(ctx *gin.Context) {
