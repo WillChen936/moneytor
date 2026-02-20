@@ -39,8 +39,8 @@ func (server *Server) createCategory(ctx *gin.Context) {
 }
 
 type listCategoriesRequest struct {
-	PageID   int32 `form:"page_id,default=1" binding:"min=1"`
-	PageSize int32 `form:"page_size,default=5" binding:"min=5,max=10"`
+	PageID   int32 `form:"pageId,default=1" binding:"min=1"`
+	PageSize int32 `form:"pageSize,default=5" binding:"min=5,max=10"`
 }
 
 func (server *Server) listCategories(ctx *gin.Context) {

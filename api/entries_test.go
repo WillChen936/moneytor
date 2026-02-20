@@ -247,7 +247,7 @@ func TestListEntries(t *testing.T) {
 		{
 			name: "OK_WithAccountID",
 			queries: map[string]string{
-				"account_id": "123",
+				"accountId": "123",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListEntriesByAccountIDParams{
@@ -264,8 +264,8 @@ func TestListEntries(t *testing.T) {
 		{
 			name: "OK_WithPagination",
 			queries: map[string]string{
-				"page_id":   "2",
-				"page_size": "10",
+				"pageId":   "2",
+				"pageSize": "10",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListEntriesParams{
@@ -281,8 +281,8 @@ func TestListEntries(t *testing.T) {
 		{
 			name: "InvalidPageID",
 			queries: map[string]string{
-				"page_id":   "0",
-				"page_size": "5",
+				"pageId":   "0",
+				"pageSize": "5",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListEntries(gomock.Any(), gomock.Any()).Times(0)
@@ -295,8 +295,8 @@ func TestListEntries(t *testing.T) {
 		{
 			name: "InvalidPageSize",
 			queries: map[string]string{
-				"page_id":   "1",
-				"page_size": "4",
+				"pageId":   "1",
+				"pageSize": "4",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListEntries(gomock.Any(), gomock.Any()).Times(0)

@@ -141,8 +141,8 @@ func TestListCategory(t *testing.T) {
 		{
 			Name: "OK_WithParams",
 			Queries: map[string]string{
-				"page_id":   "3",
-				"page_size": "10",
+				"pageId":   "3",
+				"pageSize": "10",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListCategoriesParams{
@@ -158,8 +158,8 @@ func TestListCategory(t *testing.T) {
 		{
 			Name: "InvalidPageID",
 			Queries: map[string]string{
-				"page_id":   "-1",
-				"page_size": "10",
+				"pageId":   "-1",
+				"pageSize": "10",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListCategories(gomock.Any(), gomock.Any()).Times(0)
@@ -171,8 +171,8 @@ func TestListCategory(t *testing.T) {
 		{
 			Name: "InternalError",
 			Queries: map[string]string{
-				"page_id":   "3",
-				"page_size": "10",
+				"pageId":   "3",
+				"pageSize": "10",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListCategoriesParams{

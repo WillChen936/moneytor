@@ -51,9 +51,9 @@
 
 ### **6. API 參數命名風格不一致**
 
-- **現狀：**`ListEntries` **使用 query 參數** `account_id`**（snake_case），**`createEntry` **使用 JSON body** `accountId`**（camelCase）**
-- **影響：前端需同時處理兩種風格；文件或 SDK 需特別說明**
-- **建議：擇一統一（例如對外一律 camelCase），或在 API 文件中明確說明 query 與 body 的命名慣例**
+- **現狀（已修正）：**對外 API 已統一為 **camelCase**：query 參數（如 `accountId`、`pageId`、`pageSize`）與 JSON body 皆使用 camelCase。
+- **影響：**前端只需處理一種風格；文件與 SDK 無需區分 query 與 body 的命名慣例。
+- **建議：**已在 API 文件中明確說明對外一律使用 camelCase。
 
 ---
 

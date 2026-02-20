@@ -57,9 +57,9 @@ func (server *Server) createEntry(ctx *gin.Context) {
 }
 
 type listEntriesRequest struct {
-	AccountID int64 `form:"account_id"`
-	PageID    int32 `form:"page_id,default=1" binding:"min=1"`
-	PageSize  int32 `form:"page_size,default=5" binding:"min=5,max=10"`
+	AccountID int64 `form:"accountId"`
+	PageID    int32 `form:"pageId,default=1" binding:"min=1"`
+	PageSize  int32 `form:"pageSize,default=5" binding:"min=5,max=10"`
 }
 
 func (server *Server) listEntries(ctx *gin.Context) {

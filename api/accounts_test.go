@@ -143,8 +143,8 @@ func TestListAccounts(t *testing.T) {
 		{
 			name: "OK_WithParams",
 			queries: map[string]string{
-				"page_id":   "3",
-				"page_size": "10",
+				"pageId":   "3",
+				"pageSize": "10",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListAccountsParams{
@@ -160,8 +160,8 @@ func TestListAccounts(t *testing.T) {
 		{
 			name: "InvalidPageID",
 			queries: map[string]string{
-				"page_id":   "-1",
-				"page_size": "10",
+				"pageId":   "-1",
+				"pageSize": "10",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListAccounts(gomock.Any(), gomock.Any()).Times(0)
@@ -173,8 +173,8 @@ func TestListAccounts(t *testing.T) {
 		{
 			name: "InternalError",
 			queries: map[string]string{
-				"page_id":   "3",
-				"page_size": "10",
+				"pageId":   "3",
+				"pageSize": "10",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListAccountsParams{
