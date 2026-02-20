@@ -16,7 +16,7 @@ import (
 func TestListTransactionType(t *testing.T) {
 	transactionTypes := []db.TransactionType{}
 	for i := 0; i < 1; i++ {
-		transactionTypes = append(transactionTypes, createRandomTranscationType())
+		transactionTypes = append(transactionTypes, createRandomTransactionType())
 	}
 
 	testCases := []struct {
@@ -64,7 +64,7 @@ func TestListTransactionType(t *testing.T) {
 	}
 }
 
-func createRandomTranscationType() db.TransactionType {
+func createRandomTransactionType() db.TransactionType {
 	return db.TransactionType{
 		ID:   utils.RandomInt16Range(1, 1000),
 		Name: utils.RandomString(6),
