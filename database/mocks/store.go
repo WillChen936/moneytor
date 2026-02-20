@@ -204,6 +204,21 @@ func (mr *MockStoreMockRecorder) GetTransactionType(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionType", reflect.TypeOf((*MockStore)(nil).GetTransactionType), ctx, id)
 }
 
+// ListAccounts mocks base method.
+func (m *MockStore) ListAccounts(ctx context.Context, arg db.ListAccountsParams) ([]db.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAccounts", ctx, arg)
+	ret0, _ := ret[0].([]db.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAccounts indicates an expected call of ListAccounts.
+func (mr *MockStoreMockRecorder) ListAccounts(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAccounts", reflect.TypeOf((*MockStore)(nil).ListAccounts), ctx, arg)
+}
+
 // ListCategories mocks base method.
 func (m *MockStore) ListCategories(ctx context.Context, arg db.ListCategoriesParams) ([]db.Category, error) {
 	m.ctrl.T.Helper()

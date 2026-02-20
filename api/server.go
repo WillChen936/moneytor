@@ -22,6 +22,7 @@ func NewServer(store db.Store) *Server {
 
 	v1Routes.GET("health", server.health)
 	v1Routes.POST("accounts", server.createAccount)
+	v1Routes.GET("accounts", server.listAccounts)
 	v1Routes.POST("categories", server.createCategory)
 	v1Routes.GET("categories", server.listCategories)
 	v1Routes.GET("transaction-types", server.listTransactionTypes)

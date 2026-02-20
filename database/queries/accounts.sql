@@ -14,6 +14,13 @@ SELECT *
  WHERE id = $1
  LIMIT 1;
 
+-- name: ListAccounts :many
+SELECT *
+  FROM accounts
+ ORDER BY id
+ LIMIT $1
+OFFSET $2;
+
 -- name: UpdateAccountBalance :one
 UPDATE accounts
    SET balance = balance + sqlc.arg('amount'),
