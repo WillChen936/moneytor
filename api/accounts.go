@@ -28,6 +28,10 @@ func (server *Server) createAccount(ctx *gin.Context) {
 
 	account, err := server.store.CreateAccount(ctx, arg)
 	if err != nil {
+		if db.ErrorCode(err) == db.ForeignKeyViolation {
+			ctx.JSON(http.StatusUnprocessableEntity, errResponse(err))
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}

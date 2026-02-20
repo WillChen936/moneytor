@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"math"
 	mockdb "moneytor/database/mocks"
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
@@ -58,6 +59,25 @@ func TestCreateAccount(t *testing.T) {
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "ForeignKeyViolation",
+			requestBody: gin.H{
+				"name":       account.Name,
+				"currencyId": math.MaxInt16,
+				"balance":    account.Balance,
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				arg := db.CreateAccountParams{
+					Name:       account.Name,
+					CurrencyID: math.MaxInt16,
+					Balance:    account.Balance,
+				}
+				mockStore.EXPECT().CreateAccount(gomock.Any(), eqCreateAccountParams(arg)).Times(1).Return(db.Account{}, db.ErrForeignKeyViolation)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
 			},
 		},
 		{
