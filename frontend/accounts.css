@@ -1,0 +1,18 @@
+table {
+    width: 100%;
+}
+h2 {
+    text-align: center;
+}
+th {
+    border: 1px solid #000000;
+    background-color: #674343;
+    text-align: center;
+    padding: 10px;
+}
+tr, td {
+    border: 1px solid #000000;
+    background-color: #f9d9d9;
+    padding: 10px;
+    text-align: right;
+}
