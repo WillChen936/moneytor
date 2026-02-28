@@ -5,32 +5,62 @@
     <title>Accounts</title>
 </head>
 <body>
-    <div class="table-wrapper">
-        <h2>Accounts</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Currency</th>
-                    <th>Balance</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Account 1</td>
-                    <td>USD</td>
-                    <td>100</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Account 2</td>
-                    <td>USD</td>
-                    <td>200</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <main>
+        <section id="list-section">
+            <div class="table-wrapper">
+                <h2>Accounts</h2>
+        
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Currency</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Account 1</td>
+                            <td>USD</td>
+                            <td>100</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Account 2</td>
+                            <td>USD</td>
+                            <td>200</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    
+        <section id="form-section">
+            <h2>Add Account</h2>
+            <form id="account-form">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="account-name">Name</label>
+                        <input type="text" id="account-name" name="account-name">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="account-currency">Currency</label>
+                        <select id="account-currency" name="account-currency">
+                            <option value="1">USD</option>
+                            <option value="2">EUR</option>
+                            <option value="3">JPY</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-button">
+                    <button type="submit">Add</button>
+                    <button type="button">Clear</button>
+                </div>
+            </form>
+        </section>
+    </main>
 </body>
