@@ -63,4 +63,11 @@
             </form>
         </section>
     </main>
+
+    <script>
+        console.log('Hello, world!');
+        fetch('http://localhost:8080/api/v1/accounts')
+            .then(response => response.json())
+            .then(data => console.log(data))
+    </script>
 </body>
