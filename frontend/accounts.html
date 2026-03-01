@@ -19,19 +19,8 @@
                             <th>Balance</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Account 1</td>
-                            <td>USD</td>
-                            <td>100</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Account 2</td>
-                            <td>USD</td>
-                            <td>200</td>
-                        </tr>
+                    <tbody id="account-list-table-body">
+                       
                     </tbody>
                 </table>
             </div>
@@ -64,10 +53,5 @@
         </section>
     </main>
 
-    <script>
-        console.log('Hello, world!');
-        fetch('http://localhost:8080/api/v1/accounts')
-            .then(response => response.json())
-            .then(data => console.log(data))
-    </script>
+    <script src="accounts.js"></script>
 </body>
