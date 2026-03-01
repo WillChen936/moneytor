@@ -11,39 +11,39 @@ import (
 )
 
 type Account struct {
-	ID         int64
-	Name       string
-	CurrencyID int16
-	Balance    int64
-	CreatedAt  time.Time
-	UpdatedAt  pgtype.Timestamptz
+	ID         int64              `json:"id"`
+	Name       string             `json:"name"`
+	CurrencyID int16              `json:"currency_id"`
+	Balance    int64              `json:"balance"`
+	CreatedAt  time.Time          `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Category struct {
-	ID                int64
-	Name              string
-	TransactionTypeID int16
-	CreatedAt         time.Time
-	UpdatedAt         pgtype.Timestamptz
+	ID                int64              `json:"id"`
+	Name              string             `json:"name"`
+	TransactionTypeID int16              `json:"transaction_type_id"`
+	CreatedAt         time.Time          `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Currency struct {
-	ID   int16
-	Code string
+	ID   int16  `json:"id"`
+	Code string `json:"code"`
 }
 
 type Entry struct {
-	ID            int64
-	Name          string
-	Note          string
-	FromAccountID int64
-	ToAccountID   pgtype.Int8
-	CategoryID    int64
-	Amount        int64
-	CreatedAt     time.Time
+	ID            int64       `json:"id"`
+	Name          string      `json:"name"`
+	Note          string      `json:"note"`
+	FromAccountID int64       `json:"from_account_id"`
+	ToAccountID   pgtype.Int8 `json:"to_account_id"`
+	CategoryID    int64       `json:"category_id"`
+	Amount        int64       `json:"amount"`
+	CreatedAt     time.Time   `json:"created_at"`
 }
 
 type TransactionType struct {
-	ID   int16
-	Name string
+	ID   int16  `json:"id"`
+	Name string `json:"name"`
 }

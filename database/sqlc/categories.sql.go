@@ -22,8 +22,8 @@ RETURNING id, name, transaction_type_id, created_at, updated_at
 `
 
 type CreateCategoryParams struct {
-	Name              string
-	TransactionTypeID int16
+	Name              string `json:"name"`
+	TransactionTypeID int16  `json:"transaction_type_id"`
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
@@ -78,8 +78,8 @@ OFFSET $2
 `
 
 type ListCategoriesParams struct {
-	Limit  int32
-	Offset int32
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error) {
@@ -118,9 +118,9 @@ RETURNING id, name, transaction_type_id, created_at, updated_at
 `
 
 type UpdateCategoryParams struct {
-	ID                int64
-	Name              pgtype.Text
-	TransactionTypeID pgtype.Int2
+	ID                int64       `json:"id"`
+	Name              pgtype.Text `json:"name"`
+	TransactionTypeID pgtype.Int2 `json:"transaction_type_id"`
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error) {
