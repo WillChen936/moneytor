@@ -22,7 +22,7 @@ RETURNING id, name, currency_id, balance, created_at, updated_at
 
 type CreateAccountParams struct {
 	Name       string `json:"name"`
-	CurrencyID int16  `json:"currency_id"`
+	CurrencyID int16  `json:"currencyId"`
 	Balance    int64  `json:"balance"`
 }
 

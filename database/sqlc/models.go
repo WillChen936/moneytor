@@ -13,18 +13,18 @@ import (
 type Account struct {
 	ID         int64              `json:"id"`
 	Name       string             `json:"name"`
-	CurrencyID int16              `json:"currency_id"`
+	CurrencyID int16              `json:"currencyId"`
 	Balance    int64              `json:"balance"`
-	CreatedAt  time.Time          `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	CreatedAt  time.Time          `json:"createdAt"`
+	UpdatedAt  pgtype.Timestamptz `json:"updatedAt"`
 }
 
 type Category struct {
 	ID                int64              `json:"id"`
 	Name              string             `json:"name"`
-	TransactionTypeID int16              `json:"transaction_type_id"`
-	CreatedAt         time.Time          `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	TransactionTypeID int16              `json:"transactionTypeId"`
+	CreatedAt         time.Time          `json:"createdAt"`
+	UpdatedAt         pgtype.Timestamptz `json:"updatedAt"`
 }
 
 type Currency struct {
@@ -36,11 +36,11 @@ type Entry struct {
 	ID            int64       `json:"id"`
 	Name          string      `json:"name"`
 	Note          string      `json:"note"`
-	FromAccountID int64       `json:"from_account_id"`
-	ToAccountID   pgtype.Int8 `json:"to_account_id"`
-	CategoryID    int64       `json:"category_id"`
+	FromAccountID int64       `json:"fromAccountId"`
+	ToAccountID   pgtype.Int8 `json:"toAccountId"`
+	CategoryID    int64       `json:"categoryId"`
 	Amount        int64       `json:"amount"`
-	CreatedAt     time.Time   `json:"created_at"`
+	CreatedAt     time.Time   `json:"createdAt"`
 }
 
 type TransactionType struct {

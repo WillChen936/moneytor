@@ -28,9 +28,9 @@ RETURNING id, name, note, from_account_id, to_account_id, category_id, amount, c
 type CreateEntryParams struct {
 	Name          string      `json:"name"`
 	Note          string      `json:"note"`
-	FromAccountID int64       `json:"from_account_id"`
-	ToAccountID   pgtype.Int8 `json:"to_account_id"`
-	CategoryID    int64       `json:"category_id"`
+	FromAccountID int64       `json:"fromAccountId"`
+	ToAccountID   pgtype.Int8 `json:"toAccountId"`
+	CategoryID    int64       `json:"categoryId"`
 	Amount        int64       `json:"amount"`
 }
 
@@ -134,7 +134,7 @@ SELECT id, name, note, from_account_id, to_account_id, category_id, amount, crea
 type ListEntriesByAccountIDParams struct {
 	Limit     int32 `json:"limit"`
 	Offset    int32 `json:"offset"`
-	AccountID int64 `json:"account_id"`
+	AccountID int64 `json:"accountId"`
 }
 
 func (q *Queries) ListEntriesByAccountID(ctx context.Context, arg ListEntriesByAccountIDParams) ([]Entry, error) {

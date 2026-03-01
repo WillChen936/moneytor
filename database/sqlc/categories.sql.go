@@ -23,7 +23,7 @@ RETURNING id, name, transaction_type_id, created_at, updated_at
 
 type CreateCategoryParams struct {
 	Name              string `json:"name"`
-	TransactionTypeID int16  `json:"transaction_type_id"`
+	TransactionTypeID int16  `json:"transactionTypeId"`
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
@@ -120,7 +120,7 @@ RETURNING id, name, transaction_type_id, created_at, updated_at
 type UpdateCategoryParams struct {
 	ID                int64       `json:"id"`
 	Name              pgtype.Text `json:"name"`
-	TransactionTypeID pgtype.Int2 `json:"transaction_type_id"`
+	TransactionTypeID pgtype.Int2 `json:"transactionTypeId"`
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error) {
