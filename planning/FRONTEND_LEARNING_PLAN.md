@@ -99,38 +99,54 @@ flowchart LR
 
 ---
 
-## 階段二：選框架 + 開發環境（約 2–3 週）
+## 階段二：React + Vite 開發環境（已選 React）
 
-目標：從「單一 HTML 手動改 DOM」升級成「元件化 + 建置工具」，方便之後加頁面、接更多 API。
+目標：學會剛好夠用的 React 概念，做出能呼叫 Moneytor API 的第一個頁面。
 
-### 2.1 框架選擇（二選一即可）
+### 2.1 需要學會的 React 概念（最低門檻）
 
+不需要全部學完再開始，按順序學完就可以直接進 2.3 實作：
 
-| 面向     | React                         | Vue               |
-| ------ | ----------------------------- | ----------------- |
-| 學習曲線   | 概念較多（JSX、state、hooks）         | 模板語法較接近 HTML，較易上手 |
-| 生態與職缺  | 較多                            | 也不少，亞洲尤其多         |
-| 與您專案搭配 | 可直接用 `fetch` 或 axios 接 Go API | 同上                |
+| 概念 | 用途 |
+| --- | --- |
+| JSX 語法 | HTML 寫在 JS 裡的方式 |
+| `useState` | 儲存列表資料、表單欄位值、loading 狀態 |
+| `useEffect` | 頁面載入時自動呼叫 API |
+| Props | 父元件把資料傳給子元件 |
+| 條件渲染 | `{isLoading && <p>載入中...</p>}` |
+| 列表渲染 | `{accounts.map(a => <tr key={a.id}>...)}` |
+| Controlled input | `value={state}` + `onChange`，配合表單使用 |
+| `onSubmit` | 表單送出事件 + `e.preventDefault()` |
 
+**不需要先學**：React Router、Context/Redux、`useCallback`/`useMemo`、TypeScript、測試工具。
 
-- **若希望「最快能做出可用的頁面」**：可先選 **Vue 3**（Composition API + `<script setup>`），模板和您熟悉的「後端模板」較像。
-- **若以「職涯或長期生態」為重**：可選 **React**，之後要學 Next 等也順。
+**推薦資源**：[react.dev](https://react.dev) 官方文件的「Learn React」前四章即可涵蓋上述概念。
 
-兩者都能完美對接您現有的 REST API，差別主要在語法與心智模型。
+### 2.2 建立開發環境
 
-### 2.2 開發環境
+```bash
+# 在 moneytor 目錄下建立前端專案
+npm create vite@latest web -- --template react
+cd web
+npm install
+npm run dev   # 預設跑在 http://localhost:5173
+```
 
-- 使用 **Vite** 建立專案（`npm create vite@latest`），選 Vue 或 React 即可。
-- 建議把前端專案放在 Moneytor 目錄下，例如 `web/` 或 `frontend/`，與 Go 後端分開，之後可同一 repo 一起管理。
-- 熟悉：`npm run dev`（開發伺服器）、`npm run build`（產出靜態檔）、如何把 `build` 產物給 Go 靜態檔服務（若要做成單一部署）。
+後端 CORS 已允許 `localhost:5500`，需額外加上 `localhost:5173`（Vite 預設埠）。在 `api/server.go` 的 CORS middleware 加入即可。
 
-### 2.3 第一個 SPA 目標
+熟悉三個指令就夠：`npm run dev`（開發）、`npm run build`（打包）、`npm run preview`（預覽打包結果）。
 
-- 用 Vite + 您選的框架做出「單頁」：一個表單（例如帳戶名稱 + 幣別）、一個列表。
-- 表單送出時用 `POST /api/v1/accounts` 建立帳戶，列表用 `GET /api/v1/accounts` 取得並顯示。
-- 先不考慮路由（不一定要 Vue Router / React Router），一個頁面即可；重點是「元件 + 狀態 + 呼叫 API」。
+### 2.3 實作目標（可用來確認是否準備好進入階段三）
 
-**小結**：階段二結束時，您會有一個跑在 Vite 上的小 SPA，能對 Moneytor 的 accounts 做「列表 + 新增」。
+用 Vite + React 做出帳戶頁，功能：
+
+1. **列表**：頁面載入時呼叫 `GET /api/v1/accounts`，把帳戶名稱、幣別、餘額顯示在表格
+2. **新增表單**：欄位包含帳戶名稱（text）、幣別（從 `GET /api/v1/currencies` 動態載入的下拉選單）、初始餘額（number）；送出時呼叫 `POST /api/v1/accounts`，成功後重新載入列表
+3. **載入狀態**：fetch 期間顯示「載入中...」
+
+能做出以上三點，就代表具備進入階段三所需的所有 React 基礎。
+
+**小結**：階段二結束時，`web/` 目錄下有一個跑在 Vite 上的 React 專案，帳戶列表與新增功能皆可正常運作。
 
 ---
 
