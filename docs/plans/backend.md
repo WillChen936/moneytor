@@ -1,3 +1,19 @@
+# Backend Plan
+
+## 開發順序
+
+### 階段 1：User + 認證
+- 新增 `users` 表與對應的 sqlc query
+- 實作註冊、登入 API（JWT）
+- 所有現有 query 補上 `user_id` 參數
+- 所有 handler 從 JWT 取出 `user_id` 並帶入查詢
+
+### 階段 2：完善功能與修復問題
+- 修掉下方 Bug 清單
+- 完成未完成功能（Transfer）
+
+---
+
 # Backend Issues
 
 ## Bug
