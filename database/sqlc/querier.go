@@ -6,19 +6,27 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
 	CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error)
-	DeleteAccount(ctx context.Context, id int64) error
-	DeleteCategory(ctx context.Context, id int64) error
-	GetAccount(ctx context.Context, id int64) (Account, error)
-	GetCategory(ctx context.Context, id int64) (Category, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteAccount(ctx context.Context, arg DeleteAccountParams) error
+	DeleteCategory(ctx context.Context, arg DeleteCategoryParams) error
+	DeleteSession(ctx context.Context, id pgtype.UUID) error
+	GetAccount(ctx context.Context, arg GetAccountParams) (Account, error)
+	GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error)
 	GetCurrency(ctx context.Context, id int16) (Currency, error)
 	GetEntry(ctx context.Context, id int64) (Entry, error)
+	GetSession(ctx context.Context, id pgtype.UUID) (Session, error)
 	GetTransactionType(ctx context.Context, id int16) (TransactionType, error)
+	GetUser(ctx context.Context, id int64) (User, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
 	ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error)
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListCurrencies(ctx context.Context) ([]Currency, error)

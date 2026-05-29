@@ -17,6 +17,7 @@ type Account struct {
 	Balance    int64              `json:"balance"`
 	CreatedAt  time.Time          `json:"createdAt"`
 	UpdatedAt  pgtype.Timestamptz `json:"updatedAt"`
+	UserID     int64              `json:"userId"`
 }
 
 type Category struct {
@@ -25,6 +26,7 @@ type Category struct {
 	TransactionTypeID int16              `json:"transactionTypeId"`
 	CreatedAt         time.Time          `json:"createdAt"`
 	UpdatedAt         pgtype.Timestamptz `json:"updatedAt"`
+	UserID            int64              `json:"userId"`
 }
 
 type Currency struct {
@@ -43,7 +45,24 @@ type Entry struct {
 	CreatedAt     time.Time   `json:"createdAt"`
 }
 
+type Session struct {
+	ID           pgtype.UUID `json:"id"`
+	UserID       int64       `json:"userId"`
+	RefreshToken string      `json:"refreshToken"`
+	ExpiresAt    time.Time   `json:"expiresAt"`
+	CreatedAt    time.Time   `json:"createdAt"`
+}
+
 type TransactionType struct {
 	ID   int16  `json:"id"`
 	Name string `json:"name"`
+}
+
+type User struct {
+	ID             int64              `json:"id"`
+	Username       string             `json:"username"`
+	Email          string             `json:"email"`
+	HashedPassword string             `json:"hashedPassword"`
+	CreatedAt      time.Time          `json:"createdAt"`
+	UpdatedAt      pgtype.Timestamptz `json:"updatedAt"`
 }

@@ -14,6 +14,7 @@ import (
 	db "moneytor/database/sqlc"
 	reflect "reflect"
 
+	pgtype "github.com/jackc/pgx/v5/pgtype"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -101,62 +102,106 @@ func (mr *MockStoreMockRecorder) CreateEntryTx(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEntryTx", reflect.TypeOf((*MockStore)(nil).CreateEntryTx), ctx, arg)
 }
 
-// DeleteAccount mocks base method.
-func (m *MockStore) DeleteAccount(ctx context.Context, id int64) error {
+// CreateSession mocks base method.
+func (m *MockStore) CreateSession(ctx context.Context, arg db.CreateSessionParams) (db.Session, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteAccount", ctx, id)
+	ret := m.ctrl.Call(m, "CreateSession", ctx, arg)
+	ret0, _ := ret[0].(db.Session)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateSession indicates an expected call of CreateSession.
+func (mr *MockStoreMockRecorder) CreateSession(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockStore)(nil).CreateSession), ctx, arg)
+}
+
+// CreateUser mocks base method.
+func (m *MockStore) CreateUser(ctx context.Context, arg db.CreateUserParams) (db.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUser", ctx, arg)
+	ret0, _ := ret[0].(db.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateUser indicates an expected call of CreateUser.
+func (mr *MockStoreMockRecorder) CreateUser(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockStore)(nil).CreateUser), ctx, arg)
+}
+
+// DeleteAccount mocks base method.
+func (m *MockStore) DeleteAccount(ctx context.Context, arg db.DeleteAccountParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAccount", ctx, arg)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteAccount indicates an expected call of DeleteAccount.
-func (mr *MockStoreMockRecorder) DeleteAccount(ctx, id any) *gomock.Call {
+func (mr *MockStoreMockRecorder) DeleteAccount(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccount", reflect.TypeOf((*MockStore)(nil).DeleteAccount), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccount", reflect.TypeOf((*MockStore)(nil).DeleteAccount), ctx, arg)
 }
 
 // DeleteCategory mocks base method.
-func (m *MockStore) DeleteCategory(ctx context.Context, id int64) error {
+func (m *MockStore) DeleteCategory(ctx context.Context, arg db.DeleteCategoryParams) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteCategory", ctx, id)
+	ret := m.ctrl.Call(m, "DeleteCategory", ctx, arg)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteCategory indicates an expected call of DeleteCategory.
-func (mr *MockStoreMockRecorder) DeleteCategory(ctx, id any) *gomock.Call {
+func (mr *MockStoreMockRecorder) DeleteCategory(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCategory", reflect.TypeOf((*MockStore)(nil).DeleteCategory), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCategory", reflect.TypeOf((*MockStore)(nil).DeleteCategory), ctx, arg)
+}
+
+// DeleteSession mocks base method.
+func (m *MockStore) DeleteSession(ctx context.Context, id pgtype.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSession", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSession indicates an expected call of DeleteSession.
+func (mr *MockStoreMockRecorder) DeleteSession(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MockStore)(nil).DeleteSession), ctx, id)
 }
 
 // GetAccount mocks base method.
-func (m *MockStore) GetAccount(ctx context.Context, id int64) (db.Account, error) {
+func (m *MockStore) GetAccount(ctx context.Context, arg db.GetAccountParams) (db.Account, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccount", ctx, id)
+	ret := m.ctrl.Call(m, "GetAccount", ctx, arg)
 	ret0, _ := ret[0].(db.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAccount indicates an expected call of GetAccount.
-func (mr *MockStoreMockRecorder) GetAccount(ctx, id any) *gomock.Call {
+func (mr *MockStoreMockRecorder) GetAccount(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockStore)(nil).GetAccount), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockStore)(nil).GetAccount), ctx, arg)
 }
 
 // GetCategory mocks base method.
-func (m *MockStore) GetCategory(ctx context.Context, id int64) (db.Category, error) {
+func (m *MockStore) GetCategory(ctx context.Context, arg db.GetCategoryParams) (db.Category, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCategory", ctx, id)
+	ret := m.ctrl.Call(m, "GetCategory", ctx, arg)
 	ret0, _ := ret[0].(db.Category)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetCategory indicates an expected call of GetCategory.
-func (mr *MockStoreMockRecorder) GetCategory(ctx, id any) *gomock.Call {
+func (mr *MockStoreMockRecorder) GetCategory(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategory", reflect.TypeOf((*MockStore)(nil).GetCategory), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategory", reflect.TypeOf((*MockStore)(nil).GetCategory), ctx, arg)
 }
 
 // GetCurrency mocks base method.
@@ -189,6 +234,21 @@ func (mr *MockStoreMockRecorder) GetEntry(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEntry", reflect.TypeOf((*MockStore)(nil).GetEntry), ctx, id)
 }
 
+// GetSession mocks base method.
+func (m *MockStore) GetSession(ctx context.Context, id pgtype.UUID) (db.Session, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSession", ctx, id)
+	ret0, _ := ret[0].(db.Session)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSession indicates an expected call of GetSession.
+func (mr *MockStoreMockRecorder) GetSession(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSession", reflect.TypeOf((*MockStore)(nil).GetSession), ctx, id)
+}
+
 // GetTransactionType mocks base method.
 func (m *MockStore) GetTransactionType(ctx context.Context, id int16) (db.TransactionType, error) {
 	m.ctrl.T.Helper()
@@ -202,6 +262,36 @@ func (m *MockStore) GetTransactionType(ctx context.Context, id int16) (db.Transa
 func (mr *MockStoreMockRecorder) GetTransactionType(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionType", reflect.TypeOf((*MockStore)(nil).GetTransactionType), ctx, id)
+}
+
+// GetUser mocks base method.
+func (m *MockStore) GetUser(ctx context.Context, id int64) (db.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser", ctx, id)
+	ret0, _ := ret[0].(db.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUser indicates an expected call of GetUser.
+func (mr *MockStoreMockRecorder) GetUser(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockStore)(nil).GetUser), ctx, id)
+}
+
+// GetUserByEmail mocks base method.
+func (m *MockStore) GetUserByEmail(ctx context.Context, email string) (db.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByEmail", ctx, email)
+	ret0, _ := ret[0].(db.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByEmail indicates an expected call of GetUserByEmail.
+func (mr *MockStoreMockRecorder) GetUserByEmail(ctx, email any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockStore)(nil).GetUserByEmail), ctx, email)
 }
 
 // ListAccounts mocks base method.

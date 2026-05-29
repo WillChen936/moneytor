@@ -1,10 +1,11 @@
 -- name: CreateAccount :one
 INSERT INTO accounts (
+    user_id,
     name,
     currency_id,
-    balance    
+    balance
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
 RETURNING *;
 
@@ -12,14 +13,16 @@ RETURNING *;
 SELECT *
   FROM accounts
  WHERE id = $1
+   AND user_id = $2
  LIMIT 1;
 
 -- name: ListAccounts :many
 SELECT *
   FROM accounts
+ WHERE user_id = $1
  ORDER BY id
- LIMIT $1
-OFFSET $2;
+ LIMIT $2
+OFFSET $3;
 
 -- name: UpdateAccountBalance :one
 UPDATE accounts
@@ -30,4 +33,5 @@ RETURNING *;
 
 -- name: DeleteAccount :exec
 DELETE FROM accounts
- WHERE id = $1;
+ WHERE id = $1
+   AND user_id = $2;
