@@ -1,0 +1,68 @@
+// Moneytor ERD
+// https://dbdiagram.io/
+
+Table users {
+  id              bigint      [pk, increment]
+  username        text        [not null]
+  email           text        [not null, unique]
+  hashed_password text        [not null]
+  created_at      timestamptz [not null, default: `now()`]
+  updated_at      timestamptz
+}
+
+Table sessions {
+  id              uuid        [pk, default: `gen_random_uuid()`]
+  user_id         bigint      [not null]
+  refresh_token   text        [not null]
+  expires_at      timestamptz [not null]
+  created_at      timestamptz [not null, default: `now()`]
+}
+
+Table currencies {
+  id    smallint [pk]
+  code  text     [not null]
+}
+
+Table transaction_types {
+  id   smallint [pk]
+  name text     [not null]
+}
+
+Table categories {
+  id                  bigint      [pk, increment]
+  user_id             bigint      [not null]
+  name                text        [not null]
+  transaction_type_id smallint    [not null]
+  created_at          timestamptz [not null, default: `now()`]
+  updated_at          timestamptz
+}
+
+Table accounts {
+  id          bigint      [pk, increment]
+  user_id     bigint      [not null]
+  name        text        [not null]
+  currency_id smallint    [not null]
+  balance     bigint      [not null, default: 0]
+  created_at  timestamptz [not null, default: `now()`]
+  updated_at  timestamptz
+}
+
+Table entries {
+  id              bigint      [pk, increment]
+  name            text        [not null]
+  note            text        [not null, default: '']
+  from_account_id bigint      [not null]
+  to_account_id   bigint
+  category_id     bigint      [not null]
+  amount          bigint      [not null]
+  created_at      timestamptz [not null, default: `now()`]
+}
+
+Ref: sessions.user_id > users.id
+Ref: categories.user_id > users.id
+Ref: categories.transaction_type_id > transaction_types.id
+Ref: accounts.user_id > users.id
+Ref: accounts.currency_id > currencies.id
+Ref: entries.from_account_id > accounts.id
+Ref: entries.to_account_id > accounts.id
+Ref: entries.category_id > categories.id
