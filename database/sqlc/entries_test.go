@@ -9,12 +9,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreatEntry(t *testing.T) {
+func TestGetEntry(t *testing.T) {
 	user := RandomUser(t)
 	account := RandomAccount(t, user.ID)
-	RandomEntry(t, account.ID)
-}
+	entry := RandomEntry(t, account.ID, user.ID)
 
+	entryGet, err := testStore.GetEntry(context.Background(), entry.ID)
+
+	require.NoError(t, err)
+	require.Equal(t, entry.ID, entryGet.ID)
+	require.Equal(t, entry.Name, entryGet.Name)
+	require.Equal(t, entry.Note, entryGet.Note)
+	require.Equal(t, entry.FromAccountID, entryGet.FromAccountID)
+	require.Equal(t, entry.CategoryID, entryGet.CategoryID)
+	require.Equal(t, entry.Amount, entryGet.Amount)
+}
 
 func TestListEntriesByAccountID(t *testing.T) {
 	user := RandomUser(t)
@@ -22,8 +31,8 @@ func TestListEntriesByAccountID(t *testing.T) {
 	account2 := RandomAccount(t, user.ID)
 
 	for i := 0; i < 10; i++ {
-		RandomEntry(t, account1.ID)
-		RandomEntry(t, account2.ID)
+		RandomEntry(t, account1.ID, user.ID)
+		RandomEntry(t, account2.ID, user.ID)
 	}
 
 	arg := ListEntriesByAccountIDParams{
@@ -44,9 +53,8 @@ func TestListEntriesByAccountID(t *testing.T) {
 	}
 }
 
-func RandomEntry(t *testing.T, accountID int64) Entry {
-	user := RandomUser(t)
-	category := RandomCategory(t, user.ID)
+func RandomEntry(t *testing.T, accountID int64, userID int64) Entry {
+	category := RandomCategory(t, userID)
 
 	arg := CreateEntryParams{
 		Name:          utils.RandomString(10),

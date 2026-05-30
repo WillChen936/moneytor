@@ -11,7 +11,11 @@ import (
 var countCurrencies int16 = 5
 
 func TestGetCurrency(t *testing.T) {
-	RandomCurrency(t)
+	currency, err := testStore.GetCurrency(context.Background(), 1)
+
+	require.NoError(t, err)
+	require.Equal(t, int16(1), currency.ID)
+	require.Equal(t, "TWD", currency.Code)
 }
 
 func TestListCurrencies(t *testing.T) {

@@ -11,7 +11,11 @@ import (
 var countTransactionType int16 = 3
 
 func TestGetTransactionType(t *testing.T) {
-	RandomTransactionType(t)
+	transactionType, err := testStore.GetTransactionType(context.Background(), 1)
+
+	require.NoError(t, err)
+	require.Equal(t, int16(1), transactionType.ID)
+	require.Equal(t, "expense", transactionType.Name)
 }
 
 func TestListTransactionTypes(t *testing.T) {
