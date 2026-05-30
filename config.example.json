@@ -1,0 +1,8 @@
+{
+    "Env": "DEV",
+    "DBSource": "postgres://user:password@localhost:5432/dbname?sslmode=disable",
+    "HttpServerAddress": "127.0.0.1:8080",
+    "TokenSecretKey": "run: openssl rand -base64 32",
+    "AccessTokenDuration": "15m",
+    "RefreshTokenDuration": "168h"
+}
