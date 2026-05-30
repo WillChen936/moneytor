@@ -18,7 +18,10 @@ func TestCreateCategory(t *testing.T) {
 func TestGetCategory(t *testing.T) {
 	category := RandomCategory(t, testStore)
 
-	categoryGet, err := testStore.GetCategory(context.Background(), category.ID)
+	categoryGet, err := testStore.GetCategory(context.Background(), GetCategoryParams{
+		ID:     category.ID,
+		UserID: category.UserID,
+	})
 
 	require.NoError(t, err)
 	require.Equal(t, category.ID, categoryGet.ID)
@@ -29,40 +32,37 @@ func TestGetCategory(t *testing.T) {
 }
 
 func TestListCategories(t *testing.T) {
+	user := RandomUser(t, testStore)
 	for i := 0; i < 10; i++ {
-		RandomCategory(t, testStore)
+		RandomCategoryForUser(t, testStore, user.ID)
 	}
 
-	limit := int32(5)
-	offset := int32(0)
-
 	arg := ListCategoriesParams{
-		Limit:  limit,
-		Offset: offset,
+		UserID: user.ID,
+		Limit:  5,
+		Offset: 0,
 	}
 
 	categories, err := testStore.ListCategories(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, categories)
-	require.Len(t, categories, int(limit))
+	require.Len(t, categories, int(arg.Limit))
 }
 
 func TestUpdateCategory(t *testing.T) {
 	t.Run("UpdateOnlyName", func(t *testing.T) {
 		category := RandomCategory(t, testStore)
-
 		newName := utils.RandomString(6)
 
 		arg := UpdateCategoryParams{
-			ID: category.ID,
+			ID:     category.ID,
+			UserID: category.UserID,
 			Name: pgtype.Text{
 				String: newName,
 				Valid:  true,
 			},
-			TransactionTypeID: pgtype.Int2{
-				Valid: false,
-			},
+			TransactionTypeID: pgtype.Int2{Valid: false},
 		}
 
 		categoryUpdated, err := testStore.UpdateCategory(context.Background(), arg)
@@ -79,14 +79,12 @@ func TestUpdateCategory(t *testing.T) {
 
 	t.Run("UpdateOnlyTransactionID", func(t *testing.T) {
 		category := RandomCategory(t, testStore)
-
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
 
 		arg := UpdateCategoryParams{
-			ID: category.ID,
-			Name: pgtype.Text{
-				Valid: false,
-			},
+			ID:     category.ID,
+			UserID: category.UserID,
+			Name:   pgtype.Text{Valid: false},
 			TransactionTypeID: pgtype.Int2{
 				Int16: newTransactionTypeID,
 				Valid: true,
@@ -107,12 +105,12 @@ func TestUpdateCategory(t *testing.T) {
 
 	t.Run("UpdateAll", func(t *testing.T) {
 		category := RandomCategory(t, testStore)
-
 		newName := utils.RandomString(6)
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
 
 		arg := UpdateCategoryParams{
-			ID: category.ID,
+			ID:     category.ID,
+			UserID: category.UserID,
 			Name: pgtype.Text{
 				String: newName,
 				Valid:  true,
@@ -139,8 +137,14 @@ func TestUpdateCategory(t *testing.T) {
 func TestDeleteCategory(t *testing.T) {
 	category := RandomCategory(t, testStore)
 
-	errDelete := testStore.DeleteCategory(context.Background(), category.ID)
-	categoryGet, errGet := testStore.GetCategory(context.Background(), category.ID)
+	errDelete := testStore.DeleteCategory(context.Background(), DeleteCategoryParams{
+		ID:     category.ID,
+		UserID: category.UserID,
+	})
+	categoryGet, errGet := testStore.GetCategory(context.Background(), GetCategoryParams{
+		ID:     category.ID,
+		UserID: category.UserID,
+	})
 
 	require.NoError(t, errDelete)
 	require.Error(t, errGet)
@@ -148,18 +152,25 @@ func TestDeleteCategory(t *testing.T) {
 	require.Empty(t, categoryGet)
 }
 
-func RandomCategory(t *testing.T, testStore Store) Category {
-	transactionType := RandomTransactionType(t, testStore)
+func RandomCategory(t *testing.T, store Store) Category {
+	user := RandomUser(t, store)
+	return RandomCategoryForUser(t, store, user.ID)
+}
+
+func RandomCategoryForUser(t *testing.T, store Store, userID int64) Category {
+	transactionType := RandomTransactionType(t, store)
 
 	arg := CreateCategoryParams{
+		UserID:            userID,
 		Name:              utils.RandomString(6),
 		TransactionTypeID: transactionType.ID,
 	}
 
-	category, err := testStore.CreateCategory(context.Background(), arg)
+	category, err := store.CreateCategory(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotZero(t, category.ID)
+	require.Equal(t, arg.UserID, category.UserID)
 	require.Equal(t, arg.Name, category.Name)
 	require.Equal(t, arg.TransactionTypeID, category.TransactionTypeID)
 	require.NotZero(t, category.CreatedAt)

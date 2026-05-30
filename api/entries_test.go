@@ -18,24 +18,16 @@ import (
 )
 
 func TestCreateEntry(t *testing.T) {
-	account := createRandomAccount()
+	userID := utils.RandomInt64Range(1, 1000)
+	account := createRandomAccountForUser(userID)
 	amount := int64(1000)
 
-	categoryIncome := db.Category{
-		ID:                utils.RandomInt64Range(1, 1000),
-		Name:              utils.RandomString(10),
-		TransactionTypeID: TransactionTypeIncome,
-	}
-	categoryExpense := db.Category{
-		ID:                utils.RandomInt64Range(1001, 2000),
-		Name:              utils.RandomString(10),
-		TransactionTypeID: TransactionTypeExpense,
-	}
-	categoryTransfer := db.Category{
-		ID:                utils.RandomInt64Range(2001, 3000),
-		Name:              utils.RandomString(10),
-		TransactionTypeID: TransactionTypeTransfer,
-	}
+	categoryIncome := createRandomCategoryForUser(userID)
+	categoryIncome.TransactionTypeID = TransactionTypeIncome
+	categoryExpense := createRandomCategoryForUser(userID)
+	categoryExpense.TransactionTypeID = TransactionTypeExpense
+	categoryTransfer := createRandomCategoryForUser(userID)
+	categoryTransfer.TransactionTypeID = TransactionTypeTransfer
 
 	entryIncome := createRandomEntry(account.ID, categoryIncome.ID)
 	entryIncome.Amount = amount
@@ -60,7 +52,10 @@ func TestCreateEntry(t *testing.T) {
 				"amount":     amount,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().GetCategory(gomock.Any(), categoryIncome.ID).Times(1).Return(categoryIncome, nil)
+				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
+					ID:     categoryIncome.ID,
+					UserID: userID,
+				}).Times(1).Return(categoryIncome, nil)
 				arg := db.CreateEntryTxParams{
 					Name:       entryIncome.Name,
 					Note:       entryIncome.Note,
@@ -84,7 +79,10 @@ func TestCreateEntry(t *testing.T) {
 				"amount":     amount,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().GetCategory(gomock.Any(), categoryExpense.ID).Times(1).Return(categoryExpense, nil)
+				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
+					ID:     categoryExpense.ID,
+					UserID: userID,
+				}).Times(1).Return(categoryExpense, nil)
 				arg := db.CreateEntryTxParams{
 					Name:       entryExpense.Name,
 					Note:       entryExpense.Note,
@@ -122,7 +120,10 @@ func TestCreateEntry(t *testing.T) {
 				"amount":     amount,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().GetCategory(gomock.Any(), categoryIncome.ID).Times(1).Return(db.Category{}, sql.ErrNoRows)
+				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
+					ID:     categoryIncome.ID,
+					UserID: userID,
+				}).Times(1).Return(db.Category{}, sql.ErrNoRows)
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -139,7 +140,10 @@ func TestCreateEntry(t *testing.T) {
 				"amount":     amount,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().GetCategory(gomock.Any(), categoryIncome.ID).Times(1).Return(categoryIncome, nil)
+				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
+					ID:     categoryIncome.ID,
+					UserID: userID,
+				}).Times(1).Return(categoryIncome, nil)
 				arg := db.CreateEntryTxParams{
 					Name:       entryIncome.Name,
 					Note:       entryIncome.Note,
@@ -163,7 +167,10 @@ func TestCreateEntry(t *testing.T) {
 				"amount":     amount,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().GetCategory(gomock.Any(), categoryTransfer.ID).Times(1).Return(categoryTransfer, nil)
+				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
+					ID:     categoryTransfer.ID,
+					UserID: userID,
+				}).Times(1).Return(categoryTransfer, nil)
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -180,7 +187,10 @@ func TestCreateEntry(t *testing.T) {
 				"amount":     amount,
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().GetCategory(gomock.Any(), categoryIncome.ID).Times(1).Return(categoryIncome, nil)
+				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
+					ID:     categoryIncome.ID,
+					UserID: userID,
+				}).Times(1).Return(categoryIncome, nil)
 				arg := db.CreateEntryTxParams{
 					Name:       entryIncome.Name,
 					Note:       entryIncome.Note,
@@ -203,7 +213,7 @@ func TestCreateEntry(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server := NewServer(mockStore)
+		server, maker := newTestServer(t, mockStore)
 
 		data, err := json.Marshal(testCase.requestBody)
 		require.NoError(t, err)
@@ -212,16 +222,18 @@ func TestCreateEntry(t *testing.T) {
 		request, err := http.NewRequest(http.MethodPost, "/api/v1/entries", bytes.NewReader(data))
 		require.NoError(t, err)
 
-		server.router.ServeHTTP(recorder, request)
+		addAuthorization(t, request, maker, userID)
 
+		server.router.ServeHTTP(recorder, request)
 		testCase.checkResponse(t, recorder)
 	}
 }
 
 func TestListEntries(t *testing.T) {
-	entries := []db.Entry{}
-	for i := 0; i < 5; i++ {
-		entries = append(entries, createRandomEntry(int64(i+1), int64(i+1)))
+	userID := utils.RandomInt64Range(1, 1000)
+	entries := make([]db.Entry, 5)
+	for i := range entries {
+		entries[i] = createRandomEntry(int64(i+1), int64(i+1))
 	}
 
 	testCases := []struct {
@@ -293,20 +305,6 @@ func TestListEntries(t *testing.T) {
 			},
 		},
 		{
-			name: "InvalidPageSize",
-			queries: map[string]string{
-				"pageId":   "1",
-				"pageSize": "4",
-			},
-			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().ListEntries(gomock.Any(), gomock.Any()).Times(0)
-				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Any()).Times(0)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
-			},
-		},
-		{
 			name:    "InternalError",
 			queries: map[string]string{},
 			buildStub: func(mockStore *mockdb.MockStore) {
@@ -329,11 +327,13 @@ func TestListEntries(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server := NewServer(mockStore)
+		server, maker := newTestServer(t, mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/entries", nil)
 		require.NoError(t, err)
+
+		addAuthorization(t, request, maker, userID)
 
 		q := request.URL.Query()
 		for k, v := range testCase.queries {
@@ -342,7 +342,6 @@ func TestListEntries(t *testing.T) {
 		request.URL.RawQuery = q.Encode()
 
 		server.router.ServeHTTP(recorder, request)
-
 		testCase.checkResponse(t, recorder)
 	}
 }

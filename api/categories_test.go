@@ -17,7 +17,8 @@ import (
 )
 
 func TestCreateCategory(t *testing.T) {
-	category := createRandomCategory()
+	userID := utils.RandomInt64Range(1, 1000)
+	category := createRandomCategoryForUser(userID)
 
 	testCases := []struct {
 		Name          string
@@ -33,10 +34,10 @@ func TestCreateCategory(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
+					UserID:            userID,
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
 				}
-
 				mockStore.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(category, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -64,10 +65,10 @@ func TestCreateCategory(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
+					UserID:            userID,
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
 				}
-
 				mockStore.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.Category{}, db.ErrForeignKeyViolation)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -82,10 +83,10 @@ func TestCreateCategory(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateCategoryParams{
+					UserID:            userID,
 					Name:              category.Name,
 					TransactionTypeID: category.TransactionTypeID,
 				}
-
 				mockStore.EXPECT().CreateCategory(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.Category{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -101,7 +102,7 @@ func TestCreateCategory(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server := NewServer(mockStore)
+		server, maker := newTestServer(t, mockStore)
 
 		data, err := json.Marshal(testCase.requestBody)
 		require.NoError(t, err)
@@ -110,16 +111,18 @@ func TestCreateCategory(t *testing.T) {
 		request, err := http.NewRequest(http.MethodPost, "/api/v1/categories", bytes.NewReader(data))
 		require.NoError(t, err)
 
-		server.router.ServeHTTP(recorder, request)
+		addAuthorization(t, request, maker, userID)
 
+		server.router.ServeHTTP(recorder, request)
 		testCase.checkResponse(t, recorder)
 	}
 }
 
 func TestListCategory(t *testing.T) {
-	categories := []db.Category{}
-	for i := 0; i < 10; i++ {
-		categories = append(categories, createRandomCategory())
+	userID := utils.RandomInt64Range(1, 1000)
+	categories := make([]db.Category, 10)
+	for i := range categories {
+		categories[i] = createRandomCategoryForUser(userID)
 	}
 
 	testCases := []struct {
@@ -146,6 +149,7 @@ func TestListCategory(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListCategoriesParams{
+					UserID: userID,
 					Limit:  10,
 					Offset: 20,
 				}
@@ -176,10 +180,10 @@ func TestListCategory(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListCategoriesParams{
+					UserID: userID,
 					Limit:  10,
 					Offset: 20,
 				}
-
 				mockStore.EXPECT().ListCategories(gomock.Any(), gomock.Eq(arg)).Times(1).Return([]db.Category{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -195,11 +199,13 @@ func TestListCategory(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server := NewServer(mockStore)
+		server, maker := newTestServer(t, mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/categories", nil)
 		require.NoError(t, err)
+
+		addAuthorization(t, request, maker, userID)
 
 		queries := request.URL.Query()
 		for key, value := range testCase.Queries {
@@ -208,14 +214,14 @@ func TestListCategory(t *testing.T) {
 		request.URL.RawQuery = queries.Encode()
 
 		server.router.ServeHTTP(recorder, request)
-
 		testCase.checkResponse(t, recorder)
 	}
 }
 
-func createRandomCategory() db.Category {
+func createRandomCategoryForUser(userID int64) db.Category {
 	return db.Category{
 		ID:                utils.RandomInt64Range(1, 1000),
+		UserID:            userID,
 		Name:              utils.RandomString(10),
 		TransactionTypeID: utils.RandomInt16Range(1, 3),
 	}

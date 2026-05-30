@@ -25,7 +25,7 @@ func TestCreateEntryTx(t *testing.T) {
 	require.NoError(t, err)
 
 	entryCreated := result.Entry
-	amountUpdated, err := testStore.GetAccount(ctx, account.ID)
+	amountUpdated, err := testStore.GetAccount(ctx, GetAccountParams{ID: account.ID, UserID: account.UserID})
 	require.NoError(t, err)
 
 	require.Equal(t, entryCreated.Name, arg.Name)

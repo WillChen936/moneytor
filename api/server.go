@@ -2,41 +2,52 @@ package api
 
 import (
 	db "moneytor/database/sqlc"
+	"moneytor/token"
+	"moneytor/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	store      db.Store
+	tokenMaker token.Maker
+	config     utils.Config
+	router     *gin.Engine
 }
 
-func NewServer(store db.Store) *Server {
+func NewServer(store db.Store, config utils.Config, tokenMaker token.Maker) *Server {
 	server := &Server{
-		store: store,
+		store:      store,
+		tokenMaker: tokenMaker,
+		config:     config,
 	}
 
 	router := gin.Default()
 
-	// 允許前端開發時的 origin（Live Server 常見埠）
 	allowedOrigins := []string{
 		"http://localhost:5500",
 		"http://127.0.0.1:5500",
 	}
 	router.Use(corsMiddleware(allowedOrigins))
 
-	v1Routes := router.Group("/api/v1")
+	v1 := router.Group("/api/v1")
 
-	v1Routes.GET("health", server.health)
-	v1Routes.POST("accounts", server.createAccount)
-	v1Routes.GET("accounts", server.listAccounts)
-	v1Routes.POST("categories", server.createCategory)
-	v1Routes.GET("categories", server.listCategories)
-	v1Routes.GET("transaction-types", server.listTransactionTypes)
-	v1Routes.POST("entries", server.createEntry)
-	v1Routes.GET("entries", server.listEntries)
-	v1Routes.GET("currencies", server.listCurrencies)
+	v1.POST("users", server.register)
+	v1.POST("users/login", server.login)
+	v1.POST("users/refresh", server.refresh)
+
+	auth := v1.Group("/").Use(authMiddleware(tokenMaker))
+
+	auth.GET("health", server.health)
+	auth.POST("accounts", server.createAccount)
+	auth.GET("accounts", server.listAccounts)
+	auth.POST("categories", server.createCategory)
+	auth.GET("categories", server.listCategories)
+	auth.GET("transaction-types", server.listTransactionTypes)
+	auth.POST("entries", server.createEntry)
+	auth.GET("entries", server.listEntries)
+	auth.GET("currencies", server.listCurrencies)
 
 	server.router = router
 	return server

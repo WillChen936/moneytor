@@ -4,6 +4,7 @@ import (
 	"context"
 	"moneytor/api"
 	db "moneytor/database/sqlc"
+	"moneytor/token"
 	"moneytor/utils"
 	"os"
 
@@ -33,7 +34,12 @@ func main() {
 
 	store := db.NewStore(connPool)
 
-	server := api.NewServer(store)
+	tokenMaker, err := token.NewJWTMaker(config.TokenSecretKey)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Unable to create token maker")
+	}
+
+	server := api.NewServer(store, config, tokenMaker)
 
 	if err := server.Start(config.HttpServerAddress); err != nil {
 		log.Fatal().Err(err).Msg("Unable to start server")

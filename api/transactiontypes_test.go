@@ -52,11 +52,13 @@ func TestListTransactionType(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server := NewServer(mockStore)
+		server, maker := newTestServer(t, mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/transaction-types", nil)
 		require.NoError(t, err)
+
+		addAuthorization(t, request, maker, utils.RandomInt64Range(1, 1000))
 
 		server.router.ServeHTTP(recorder, request)
 

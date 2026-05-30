@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	db "moneytor/database/sqlc"
+	"moneytor/token"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,10 @@ func (server *Server) createCategory(ctx *gin.Context) {
 		return
 	}
 
+	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+
 	arg := db.CreateCategoryParams{
+		UserID:            payload.UserID,
 		Name:              req.Name,
 		TransactionTypeID: req.TransactionTypeID,
 	}
@@ -40,7 +44,7 @@ func (server *Server) createCategory(ctx *gin.Context) {
 
 type listCategoriesRequest struct {
 	PageID   int32 `form:"pageId,default=1" binding:"min=1"`
-	PageSize int32 `form:"pageSize,default=5" binding:"min=5,max=10"`
+	PageSize int32 `form:"pageSize,default=5" binding:"min=1,max=10"`
 }
 
 func (server *Server) listCategories(ctx *gin.Context) {
@@ -50,7 +54,10 @@ func (server *Server) listCategories(ctx *gin.Context) {
 		return
 	}
 
+	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+
 	arg := db.ListCategoriesParams{
+		UserID: payload.UserID,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}

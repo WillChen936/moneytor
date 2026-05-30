@@ -3,16 +3,19 @@ package db
 import (
 	"errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
 const (
 	ForeignKeyViolation string = "23503"
+	UniqueViolation     string = "23505"
 )
 
-var ErrForeignKeyViolation = &pgconn.PgError{
-	Code: ForeignKeyViolation,
-}
+var (
+	ErrRecordNotFound    = pgx.ErrNoRows
+	ErrForeignKeyViolation = &pgconn.PgError{Code: ForeignKeyViolation}
+)
 
 func ErrorCode(err error) string {
 	var pgErr *pgconn.PgError

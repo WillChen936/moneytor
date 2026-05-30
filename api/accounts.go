@@ -2,6 +2,7 @@ package api
 
 import (
 	db "moneytor/database/sqlc"
+	"moneytor/token"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 type createAccountRequest struct {
 	Name       string `json:"name" binding:"required"`
 	CurrencyID int16  `json:"currencyId" binding:"required,gt=0"`
-	Balance    int64  `json:"balance" binding:"required,gt=0"`
+	Balance    int64  `json:"balance" binding:"required,gte=0"`
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
@@ -20,7 +21,10 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+
 	arg := db.CreateAccountParams{
+		UserID:     payload.UserID,
 		Name:       req.Name,
 		CurrencyID: req.CurrencyID,
 		Balance:    req.Balance,
@@ -41,7 +45,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 
 type listAccountsRequest struct {
 	PageID   int32 `form:"pageId,default=1" binding:"min=1"`
-	PageSize int32 `form:"pageSize,default=5" binding:"min=5,max=10"`
+	PageSize int32 `form:"pageSize,default=5" binding:"min=1,max=10"`
 }
 
 func (server *Server) listAccounts(ctx *gin.Context) {
@@ -51,7 +55,10 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 		return
 	}
 
+	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+
 	arg := db.ListAccountsParams{
+		UserID: payload.UserID,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}

@@ -19,7 +19,8 @@ import (
 )
 
 func TestCreateAccount(t *testing.T) {
-	account := createRandomAccount()
+	userID := utils.RandomInt64Range(1, 1000)
+	account := createRandomAccountForUser(userID)
 
 	testCases := []struct {
 		name          string
@@ -36,11 +37,11 @@ func TestCreateAccount(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateAccountParams{
+					UserID:     userID,
 					Name:       account.Name,
 					CurrencyID: account.CurrencyID,
 					Balance:    account.Balance,
 				}
-
 				mockStore.EXPECT().CreateAccount(gomock.Any(), eqCreateAccountParams(arg)).Times(1).Return(account, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -70,6 +71,7 @@ func TestCreateAccount(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateAccountParams{
+					UserID:     userID,
 					Name:       account.Name,
 					CurrencyID: math.MaxInt16,
 					Balance:    account.Balance,
@@ -94,6 +96,20 @@ func TestCreateAccount(t *testing.T) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
+		{
+			name: "Unauthorized",
+			requestBody: gin.H{
+				"name":       account.Name,
+				"currencyId": account.CurrencyID,
+				"balance":    account.Balance,
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -103,7 +119,7 @@ func TestCreateAccount(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server := NewServer(mockStore)
+		server, maker := newTestServer(t, mockStore)
 
 		data, err := json.Marshal(testCase.requestBody)
 		require.NoError(t, err)
@@ -112,16 +128,20 @@ func TestCreateAccount(t *testing.T) {
 		request, err := http.NewRequest(http.MethodPost, "/api/v1/accounts", bytes.NewReader(data))
 		require.NoError(t, err)
 
-		server.router.ServeHTTP(recorder, request)
+		if testCase.name != "Unauthorized" {
+			addAuthorization(t, request, maker, userID)
+		}
 
+		server.router.ServeHTTP(recorder, request)
 		testCase.checkResponse(t, recorder)
 	}
 }
 
 func TestListAccounts(t *testing.T) {
-	accounts := []db.Account{}
-	for i := 0; i < 10; i++ {
-		accounts = append(accounts, createRandomAccount())
+	userID := utils.RandomInt64Range(1, 1000)
+	accounts := make([]db.Account, 10)
+	for i := range accounts {
+		accounts[i] = createRandomAccountForUser(userID)
 	}
 
 	testCases := []struct {
@@ -148,6 +168,7 @@ func TestListAccounts(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListAccountsParams{
+					UserID: userID,
 					Limit:  10,
 					Offset: 20,
 				}
@@ -178,6 +199,7 @@ func TestListAccounts(t *testing.T) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListAccountsParams{
+					UserID: userID,
 					Limit:  10,
 					Offset: 20,
 				}
@@ -196,11 +218,13 @@ func TestListAccounts(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server := NewServer(mockStore)
+		server, maker := newTestServer(t, mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/accounts", nil)
 		require.NoError(t, err)
+
+		addAuthorization(t, request, maker, userID)
 
 		queries := request.URL.Query()
 		for key, value := range testCase.queries {
@@ -209,14 +233,14 @@ func TestListAccounts(t *testing.T) {
 		request.URL.RawQuery = queries.Encode()
 
 		server.router.ServeHTTP(recorder, request)
-
 		testCase.checkResponse(t, recorder)
 	}
 }
 
-func createRandomAccount() db.Account {
+func createRandomAccountForUser(userID int64) db.Account {
 	return db.Account{
 		ID:         utils.RandomInt64Range(1, 1000),
+		UserID:     userID,
 		Name:       utils.RandomString(10),
 		CurrencyID: utils.RandomInt16Range(1, 10),
 		Balance:    utils.RandomInt64Range(1, 100),
@@ -236,13 +260,13 @@ func (e eqCreateAccountParamsMatcher) Matches(x any) bool {
 	if !ok {
 		return false
 	}
-
-	return e.arg.Name == arg.Name &&
+	return e.arg.UserID == arg.UserID &&
+		e.arg.Name == arg.Name &&
 		e.arg.CurrencyID == arg.CurrencyID &&
 		e.arg.Balance == arg.Balance
 }
 
 func (e eqCreateAccountParamsMatcher) String() string {
-	return fmt.Sprintf("is equal to CreateAccountParams{Name=%s, CurrencyID=%d, Balance=%d}",
-		e.arg.Name, e.arg.CurrencyID, e.arg.Balance)
+	return fmt.Sprintf("is equal to CreateAccountParams{UserID=%d, Name=%s, CurrencyID=%d, Balance=%d}",
+		e.arg.UserID, e.arg.Name, e.arg.CurrencyID, e.arg.Balance)
 }

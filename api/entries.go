@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	db "moneytor/database/sqlc"
+	"moneytor/token"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,13 +24,18 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		return
 	}
 
-	category, err := server.store.GetCategory(ctx, req.CategoryID)
+	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+
+	category, err := server.store.GetCategory(ctx, db.GetCategoryParams{
+		ID:     req.CategoryID,
+		UserID: payload.UserID,
+	})
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, errResponse(err))
 		return
 	}
 
-	amount, err := ResolverEntryAmount(category.TransactionTypeID, req.Amount)
+	amount, err := resolverEntryAmount(category.TransactionTypeID, req.Amount)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
@@ -59,7 +65,7 @@ func (server *Server) createEntry(ctx *gin.Context) {
 type listEntriesRequest struct {
 	AccountID int64 `form:"accountId"`
 	PageID    int32 `form:"pageId,default=1" binding:"min=1"`
-	PageSize  int32 `form:"pageSize,default=5" binding:"min=5,max=10"`
+	PageSize  int32 `form:"pageSize,default=5" binding:"min=1,max=10"`
 }
 
 func (server *Server) listEntries(ctx *gin.Context) {
@@ -97,7 +103,7 @@ func (server *Server) listEntries(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, entries)
 }
 
-func ResolverEntryAmount(transactionTypeID int16, rawAmount int64) (int64, error) {
+func resolverEntryAmount(transactionTypeID int16, rawAmount int64) (int64, error) {
 	switch transactionTypeID {
 	case TransactionTypeExpense:
 		return -1 * rawAmount, nil

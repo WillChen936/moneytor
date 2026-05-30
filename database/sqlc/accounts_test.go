@@ -17,7 +17,10 @@ func TestCreateAccount(t *testing.T) {
 func TestGetAccount(t *testing.T) {
 	account := RandomAccount(t, testStore)
 
-	accountGet, err := testStore.GetAccount(context.Background(), account.ID)
+	accountGet, err := testStore.GetAccount(context.Background(), GetAccountParams{
+		ID:     account.ID,
+		UserID: account.UserID,
+	})
 
 	require.NoError(t, err)
 	require.Equal(t, account.ID, accountGet.ID)
@@ -52,30 +55,35 @@ func TestUpdateAccountBalance(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
+	user := RandomUser(t, testStore)
 	for i := 0; i < 10; i++ {
-		RandomAccount(t, testStore)
+		RandomAccountForUser(t, testStore, user.ID)
 	}
 
-	limit := int32(5)
-	offset := int32(0)
-
 	arg := ListAccountsParams{
-		Limit:  limit,
-		Offset: offset,
+		UserID: user.ID,
+		Limit:  5,
+		Offset: 0,
 	}
 
 	accounts, err := testStore.ListAccounts(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
-	require.Len(t, accounts, int(limit))
+	require.Len(t, accounts, int(arg.Limit))
 }
 
 func TestDeleteAccount(t *testing.T) {
 	account := RandomAccount(t, testStore)
 
-	errDelete := testStore.DeleteAccount(context.Background(), account.ID)
-	accountGet, errGet := testStore.GetAccount(context.Background(), account.ID)
+	errDelete := testStore.DeleteAccount(context.Background(), DeleteAccountParams{
+		ID:     account.ID,
+		UserID: account.UserID,
+	})
+	accountGet, errGet := testStore.GetAccount(context.Background(), GetAccountParams{
+		ID:     account.ID,
+		UserID: account.UserID,
+	})
 
 	require.NoError(t, errDelete)
 	require.Error(t, errGet)
@@ -83,17 +91,24 @@ func TestDeleteAccount(t *testing.T) {
 	require.Empty(t, accountGet)
 }
 
-func RandomAccount(t *testing.T, testStore Store) Account {
+func RandomAccount(t *testing.T, store Store) Account {
+	user := RandomUser(t, store)
+	return RandomAccountForUser(t, store, user.ID)
+}
+
+func RandomAccountForUser(t *testing.T, store Store, userID int64) Account {
 	arg := CreateAccountParams{
+		UserID:     userID,
 		Name:       utils.RandomString(6),
-		CurrencyID: RandomCurrency(t, testStore).ID,
+		CurrencyID: RandomCurrency(t, store).ID,
 		Balance:    utils.RandomInt64Range(100, 10000),
 	}
 
-	account, err := testStore.CreateAccount(context.Background(), arg)
+	account, err := store.CreateAccount(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, account.ID)
+	require.Equal(t, arg.UserID, account.UserID)
 	require.Equal(t, arg.Name, account.Name)
 	require.Equal(t, arg.CurrencyID, account.CurrencyID)
 	require.Equal(t, arg.Balance, account.Balance)
