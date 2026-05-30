@@ -9,6 +9,33 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestCreateUser(t *testing.T) {
+	RandomUser(t)
+}
+
+func TestGetUser(t *testing.T) {
+	user := RandomUser(t)
+
+	userGet, err := testStore.GetUser(context.Background(), user.ID)
+
+	require.NoError(t, err)
+	require.Equal(t, user.ID, userGet.ID)
+	require.Equal(t, user.Username, userGet.Username)
+	require.Equal(t, user.Email, userGet.Email)
+	require.Equal(t, user.HashedPassword, userGet.HashedPassword)
+}
+
+func TestGetUserByEmail(t *testing.T) {
+	user := RandomUser(t)
+
+	userGet, err := testStore.GetUserByEmail(context.Background(), user.Email)
+
+	require.NoError(t, err)
+	require.Equal(t, user.ID, userGet.ID)
+	require.Equal(t, user.Username, userGet.Username)
+	require.Equal(t, user.Email, userGet.Email)
+}
+
 func RandomUser(t *testing.T) User {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(utils.RandomString(8)), bcrypt.DefaultCost)
 	require.NoError(t, err)
