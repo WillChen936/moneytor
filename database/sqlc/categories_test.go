@@ -12,11 +12,13 @@ import (
 )
 
 func TestCreateCategory(t *testing.T) {
-	RandomCategory(t)
+	user := RandomUser(t)
+	RandomCategory(t, user.ID)
 }
 
 func TestGetCategory(t *testing.T) {
-	category := RandomCategory(t)
+	user := RandomUser(t)
+	category := RandomCategory(t, user.ID)
 
 	categoryGet, err := testStore.GetCategory(context.Background(), GetCategoryParams{
 		ID:     category.ID,
@@ -34,7 +36,7 @@ func TestGetCategory(t *testing.T) {
 func TestListCategories(t *testing.T) {
 	user := RandomUser(t)
 	for i := 0; i < 10; i++ {
-		RandomCategoryForUser(t, user.ID)
+		RandomCategory(t, user.ID)
 	}
 
 	arg := ListCategoriesParams{
@@ -52,7 +54,8 @@ func TestListCategories(t *testing.T) {
 
 func TestUpdateCategory(t *testing.T) {
 	t.Run("UpdateOnlyName", func(t *testing.T) {
-		category := RandomCategory(t)
+		user := RandomUser(t)
+		category := RandomCategory(t, user.ID)
 		newName := utils.RandomString(6)
 
 		arg := UpdateCategoryParams{
@@ -78,7 +81,8 @@ func TestUpdateCategory(t *testing.T) {
 	})
 
 	t.Run("UpdateOnlyTransactionID", func(t *testing.T) {
-		category := RandomCategory(t)
+		user := RandomUser(t)
+		category := RandomCategory(t, user.ID)
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
 
 		arg := UpdateCategoryParams{
@@ -104,7 +108,8 @@ func TestUpdateCategory(t *testing.T) {
 	})
 
 	t.Run("UpdateAll", func(t *testing.T) {
-		category := RandomCategory(t)
+		user := RandomUser(t)
+		category := RandomCategory(t, user.ID)
 		newName := utils.RandomString(6)
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
 
@@ -135,7 +140,8 @@ func TestUpdateCategory(t *testing.T) {
 }
 
 func TestDeleteCategory(t *testing.T) {
-	category := RandomCategory(t)
+	user := RandomUser(t)
+	category := RandomCategory(t, user.ID)
 
 	errDelete := testStore.DeleteCategory(context.Background(), DeleteCategoryParams{
 		ID:     category.ID,
@@ -152,12 +158,7 @@ func TestDeleteCategory(t *testing.T) {
 	require.Empty(t, categoryGet)
 }
 
-func RandomCategory(t *testing.T) Category {
-	user := RandomUser(t)
-	return RandomCategoryForUser(t, user.ID)
-}
-
-func RandomCategoryForUser(t *testing.T, userID int64) Category {
+func RandomCategory(t *testing.T, userID int64) Category {
 	transactionType := RandomTransactionType(t)
 
 	arg := CreateCategoryParams{

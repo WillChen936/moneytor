@@ -10,14 +10,15 @@ import (
 
 func TestCreateEntryTx(t *testing.T) {
 	ctx := context.Background()
-	account := RandomAccount(t)
+	user := RandomUser(t)
+	account := RandomAccount(t, user.ID)
 	amount := utils.RandomInt64Range(-100, 100)
 
 	arg := CreateEntryTxParams{
 		Name:       utils.RandomString(6),
 		Note:       utils.RandomString(6),
 		AccountID:  account.ID,
-		CategoryID: RandomCategory(t).ID,
+		CategoryID: RandomCategory(t, user.ID).ID,
 		Amount:     amount,
 	}
 

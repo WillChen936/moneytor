@@ -10,12 +10,14 @@ import (
 )
 
 func TestCreatEntry(t *testing.T) {
-	account := RandomAccount(t)
+	user := RandomUser(t)
+	account := RandomAccount(t, user.ID)
 	RandomEntry(t, account.ID)
 }
 
 func TestListEntries(t *testing.T) {
-	account := RandomAccount(t)
+	user := RandomUser(t)
+	account := RandomAccount(t, user.ID)
 
 	for i := 0; i < 10; i++ {
 		RandomEntry(t, account.ID)
@@ -38,8 +40,9 @@ func TestListEntries(t *testing.T) {
 }
 
 func TestListEntriesByAccountID(t *testing.T) {
-	account1 := RandomAccount(t)
-	account2 := RandomAccount(t)
+	user := RandomUser(t)
+	account1 := RandomAccount(t, user.ID)
+	account2 := RandomAccount(t, user.ID)
 
 	for i := 0; i < 10; i++ {
 		RandomEntry(t, account1.ID)
@@ -65,7 +68,8 @@ func TestListEntriesByAccountID(t *testing.T) {
 }
 
 func RandomEntry(t *testing.T, accountID int64) Entry {
-	category := RandomCategory(t)
+	user := RandomUser(t)
+	category := RandomCategory(t, user.ID)
 
 	arg := CreateEntryParams{
 		Name:          utils.RandomString(10),
