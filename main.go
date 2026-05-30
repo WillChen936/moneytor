@@ -29,7 +29,6 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to connect to database")
 	}
-
 	defer connPool.Close()
 
 	store := db.NewStore(connPool)

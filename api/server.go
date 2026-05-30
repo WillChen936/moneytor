@@ -4,7 +4,6 @@ import (
 	db "moneytor/database/sqlc"
 	"moneytor/token"
 	"moneytor/utils"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,12 +24,6 @@ func NewServer(store db.Store, config utils.Config, tokenMaker token.Maker) *Ser
 
 	router := gin.Default()
 
-	allowedOrigins := []string{
-		"http://localhost:5500",
-		"http://127.0.0.1:5500",
-	}
-	router.Use(corsMiddleware(allowedOrigins))
-
 	v1 := router.Group("/api/v1")
 
 	v1.POST("users", server.register)
@@ -39,7 +32,6 @@ func NewServer(store db.Store, config utils.Config, tokenMaker token.Maker) *Ser
 
 	auth := v1.Group("/").Use(authMiddleware(tokenMaker))
 
-	auth.GET("health", server.health)
 	auth.POST("accounts", server.createAccount)
 	auth.GET("accounts", server.listAccounts)
 	auth.POST("categories", server.createCategory)
@@ -57,34 +49,6 @@ func (s *Server) Start(address string) error {
 	return s.router.Run(address)
 }
 
-func (s *Server) health(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"status": "ok",
-	})
-}
-
 func errResponse(err error) gin.H {
 	return gin.H{"error": err.Error()}
-}
-
-// corsMiddleware 允許指定來源的跨域請求（開發時前端 origin）。
-func corsMiddleware(allowedOrigins []string) gin.HandlerFunc {
-	originSet := make(map[string]bool)
-	for _, o := range allowedOrigins {
-		originSet[o] = true
-	}
-	return func(c *gin.Context) {
-		origin := c.GetHeader("Origin")
-		if originSet[origin] {
-			c.Header("Access-Control-Allow-Origin", origin)
-		}
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
-		c.Header("Access-Control-Max-Age", "86400")
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-			return
-		}
-		c.Next()
-	}
 }

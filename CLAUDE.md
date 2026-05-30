@@ -36,7 +36,7 @@ make mockdb
 
 ## Architecture
 
-**Moneytor** is a personal finance tracker. The backend is a Go REST API backed by PostgreSQL; the frontend is plain HTML/CSS/JS served separately via VS Code Live Server (expects origin `http://localhost:5500`).
+**Moneytor** is a personal finance tracker. The backend is a Go REST API backed by PostgreSQL.
 
 ### Layer overview
 
@@ -51,7 +51,6 @@ database/
     store.go          — Store interface + SQLStore; custom transactions go here
     tx_create_entry.go — example transaction: creates entry + updates balance
   mocks/store.go      — mockgen-generated mock of Store (used in api tests)
-frontend/             — static HTML/CSS/JS for the accounts view
 ```
 
 ### Key design patterns
@@ -60,7 +59,7 @@ frontend/             — static HTML/CSS/JS for the accounts view
 - **Mock-based API tests**: `api/*_test.go` files use `mockdb.NewMockStore` (from `database/mocks/`) rather than a real DB. DB-layer tests (`database/sqlc/*_test.go`) hit a real Postgres instance configured via `config.json`.
 - **Amount sign convention**: expense entries are stored with a negative `amount`; income entries with positive. `ResolverEntryAmount` in `api/entries.go` applies this using the `TransactionType` constants (Expense=1, Income=2, Transfer=3).
 - **Monetary amounts as integers**: `amount` is stored as `int64` (smallest currency unit, e.g. cents). No `decimal` type is used in current models despite the sqlc override in `sqlc.yaml`.
-- **CORS**: hardcoded to allow `http://localhost:5500` and `http://127.0.0.1:5500` (VS Code Live Server). Update `api/server.go` `allowedOrigins` for other dev setups.
+- **CORS**: configured in `api/server.go` `allowedOrigins`.
 
 ### Adding a new resource
 
