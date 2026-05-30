@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RandomUser(t *testing.T, store Store) User {
+func RandomUser(t *testing.T) User {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(utils.RandomString(8)), bcrypt.DefaultCost)
 	require.NoError(t, err)
 
@@ -19,7 +19,7 @@ func RandomUser(t *testing.T, store Store) User {
 		HashedPassword: string(hashedPassword),
 	}
 
-	user, err := store.CreateUser(context.Background(), arg)
+	user, err := testStore.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotZero(t, user.ID)
 	require.Equal(t, arg.Username, user.Username)

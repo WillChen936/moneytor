@@ -11,11 +11,11 @@ import (
 )
 
 func TestCreateAccount(t *testing.T) {
-	RandomAccount(t, testStore)
+	RandomAccount(t)
 }
 
 func TestGetAccount(t *testing.T) {
-	account := RandomAccount(t, testStore)
+	account := RandomAccount(t)
 
 	accountGet, err := testStore.GetAccount(context.Background(), GetAccountParams{
 		ID:     account.ID,
@@ -31,7 +31,7 @@ func TestGetAccount(t *testing.T) {
 }
 
 func TestUpdateAccountBalance(t *testing.T) {
-	account := RandomAccount(t, testStore)
+	account := RandomAccount(t)
 
 	amount := utils.RandomInt64Range(-100, 100)
 
@@ -55,9 +55,9 @@ func TestUpdateAccountBalance(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
-	user := RandomUser(t, testStore)
+	user := RandomUser(t)
 	for i := 0; i < 10; i++ {
-		RandomAccountForUser(t, testStore, user.ID)
+		RandomAccountForUser(t, user.ID)
 	}
 
 	arg := ListAccountsParams{
@@ -74,7 +74,7 @@ func TestListAccounts(t *testing.T) {
 }
 
 func TestDeleteAccount(t *testing.T) {
-	account := RandomAccount(t, testStore)
+	account := RandomAccount(t)
 
 	errDelete := testStore.DeleteAccount(context.Background(), DeleteAccountParams{
 		ID:     account.ID,
@@ -91,20 +91,20 @@ func TestDeleteAccount(t *testing.T) {
 	require.Empty(t, accountGet)
 }
 
-func RandomAccount(t *testing.T, store Store) Account {
-	user := RandomUser(t, store)
-	return RandomAccountForUser(t, store, user.ID)
+func RandomAccount(t *testing.T) Account {
+	user := RandomUser(t)
+	return RandomAccountForUser(t, user.ID)
 }
 
-func RandomAccountForUser(t *testing.T, store Store, userID int64) Account {
+func RandomAccountForUser(t *testing.T, userID int64) Account {
 	arg := CreateAccountParams{
 		UserID:     userID,
 		Name:       utils.RandomString(6),
-		CurrencyID: RandomCurrency(t, store).ID,
+		CurrencyID: RandomCurrency(t).ID,
 		Balance:    utils.RandomInt64Range(100, 10000),
 	}
 
-	account, err := store.CreateAccount(context.Background(), arg)
+	account, err := testStore.CreateAccount(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, account.ID)

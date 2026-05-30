@@ -12,11 +12,11 @@ import (
 )
 
 func TestCreateCategory(t *testing.T) {
-	RandomCategory(t, testStore)
+	RandomCategory(t)
 }
 
 func TestGetCategory(t *testing.T) {
-	category := RandomCategory(t, testStore)
+	category := RandomCategory(t)
 
 	categoryGet, err := testStore.GetCategory(context.Background(), GetCategoryParams{
 		ID:     category.ID,
@@ -32,9 +32,9 @@ func TestGetCategory(t *testing.T) {
 }
 
 func TestListCategories(t *testing.T) {
-	user := RandomUser(t, testStore)
+	user := RandomUser(t)
 	for i := 0; i < 10; i++ {
-		RandomCategoryForUser(t, testStore, user.ID)
+		RandomCategoryForUser(t, user.ID)
 	}
 
 	arg := ListCategoriesParams{
@@ -52,7 +52,7 @@ func TestListCategories(t *testing.T) {
 
 func TestUpdateCategory(t *testing.T) {
 	t.Run("UpdateOnlyName", func(t *testing.T) {
-		category := RandomCategory(t, testStore)
+		category := RandomCategory(t)
 		newName := utils.RandomString(6)
 
 		arg := UpdateCategoryParams{
@@ -78,7 +78,7 @@ func TestUpdateCategory(t *testing.T) {
 	})
 
 	t.Run("UpdateOnlyTransactionID", func(t *testing.T) {
-		category := RandomCategory(t, testStore)
+		category := RandomCategory(t)
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
 
 		arg := UpdateCategoryParams{
@@ -104,7 +104,7 @@ func TestUpdateCategory(t *testing.T) {
 	})
 
 	t.Run("UpdateAll", func(t *testing.T) {
-		category := RandomCategory(t, testStore)
+		category := RandomCategory(t)
 		newName := utils.RandomString(6)
 		newTransactionTypeID := utils.RandomInt16Range(1, 3)
 
@@ -135,7 +135,7 @@ func TestUpdateCategory(t *testing.T) {
 }
 
 func TestDeleteCategory(t *testing.T) {
-	category := RandomCategory(t, testStore)
+	category := RandomCategory(t)
 
 	errDelete := testStore.DeleteCategory(context.Background(), DeleteCategoryParams{
 		ID:     category.ID,
@@ -152,13 +152,13 @@ func TestDeleteCategory(t *testing.T) {
 	require.Empty(t, categoryGet)
 }
 
-func RandomCategory(t *testing.T, store Store) Category {
-	user := RandomUser(t, store)
-	return RandomCategoryForUser(t, store, user.ID)
+func RandomCategory(t *testing.T) Category {
+	user := RandomUser(t)
+	return RandomCategoryForUser(t, user.ID)
 }
 
-func RandomCategoryForUser(t *testing.T, store Store, userID int64) Category {
-	transactionType := RandomTransactionType(t, store)
+func RandomCategoryForUser(t *testing.T, userID int64) Category {
+	transactionType := RandomTransactionType(t)
 
 	arg := CreateCategoryParams{
 		UserID:            userID,
@@ -166,7 +166,7 @@ func RandomCategoryForUser(t *testing.T, store Store, userID int64) Category {
 		TransactionTypeID: transactionType.ID,
 	}
 
-	category, err := store.CreateCategory(context.Background(), arg)
+	category, err := testStore.CreateCategory(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotZero(t, category.ID)
