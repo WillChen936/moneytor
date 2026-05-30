@@ -339,21 +339,6 @@ func (mr *MockStoreMockRecorder) ListCurrencies(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCurrencies", reflect.TypeOf((*MockStore)(nil).ListCurrencies), ctx)
 }
 
-// ListEntries mocks base method.
-func (m *MockStore) ListEntries(ctx context.Context, arg db.ListEntriesParams) ([]db.Entry, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListEntries", ctx, arg)
-	ret0, _ := ret[0].([]db.Entry)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListEntries indicates an expected call of ListEntries.
-func (mr *MockStoreMockRecorder) ListEntries(ctx, arg any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEntries", reflect.TypeOf((*MockStore)(nil).ListEntries), ctx, arg)
-}
-
 // ListEntriesByAccountID mocks base method.
 func (m *MockStore) ListEntriesByAccountID(ctx context.Context, arg db.ListEntriesByAccountIDParams) ([]db.Entry, error) {
 	m.ctrl.T.Helper()

@@ -15,29 +15,6 @@ func TestCreatEntry(t *testing.T) {
 	RandomEntry(t, account.ID)
 }
 
-func TestListEntries(t *testing.T) {
-	user := RandomUser(t)
-	account := RandomAccount(t, user.ID)
-
-	for i := 0; i < 10; i++ {
-		RandomEntry(t, account.ID)
-	}
-
-	arg := ListEntriesParams{
-		Limit:  5,
-		Offset: 1,
-	}
-
-	entries, err := testStore.ListEntries(context.Background(), arg)
-
-	require.NoError(t, err)
-	require.NotEmpty(t, entries)
-	require.Len(t, entries, int(arg.Limit))
-
-	for _, entry := range entries {
-		require.NotEmpty(t, entry)
-	}
-}
 
 func TestListEntriesByAccountID(t *testing.T) {
 	user := RandomUser(t)

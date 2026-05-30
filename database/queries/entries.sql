@@ -17,13 +17,6 @@ SELECT *
  WHERE id = $1
  LIMIT 1;
 
--- name: ListEntries :many
-SELECT *
-  FROM entries
- ORDER BY id DESC
- LIMIT $1
- OFFSET $2;
-
 -- name: ListEntriesByAccountID :many
 SELECT *
   FROM entries

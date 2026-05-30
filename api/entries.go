@@ -63,7 +63,7 @@ func (server *Server) createEntry(ctx *gin.Context) {
 }
 
 type listEntriesRequest struct {
-	AccountID int64 `form:"accountId"`
+	AccountID int64 `form:"accountId" binding:"required,gt=0"`
 	PageID    int32 `form:"pageId,default=1" binding:"min=1"`
 	PageSize  int32 `form:"pageSize,default=5" binding:"min=1,max=10"`
 }
@@ -75,25 +75,14 @@ func (server *Server) listEntries(ctx *gin.Context) {
 		return
 	}
 
-	var entries []db.Entry
-	var err error
 	offset := (req.PageID - 1) * req.PageSize
-	if req.AccountID == 0 {
-		arg := db.ListEntriesParams{
-			Limit:  req.PageSize,
-			Offset: offset,
-		}
-
-		entries, err = server.store.ListEntries(ctx, arg)
-	} else {
-		arg := db.ListEntriesByAccountIDParams{
-			AccountID: req.AccountID,
-			Limit:     req.PageSize,
-			Offset:    offset,
-		}
-
-		entries, err = server.store.ListEntriesByAccountID(ctx, arg)
+	arg := db.ListEntriesByAccountIDParams{
+		AccountID: req.AccountID,
+		Limit:     req.PageSize,
+		Offset:    offset,
 	}
+
+	entries, err := server.store.ListEntriesByAccountID(ctx, arg)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))

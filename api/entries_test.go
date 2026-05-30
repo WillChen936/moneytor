@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	mockdb "moneytor/database/mocks"
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
@@ -231,9 +232,10 @@ func TestCreateEntry(t *testing.T) {
 
 func TestListEntries(t *testing.T) {
 	userID := utils.RandomInt64Range(1, 1000)
+	accountID := utils.RandomInt64Range(1, 1000)
 	entries := make([]db.Entry, 5)
 	for i := range entries {
-		entries[i] = createRandomEntry(int64(i+1), int64(i+1))
+		entries[i] = createRandomEntry(accountID, int64(i+1))
 	}
 
 	testCases := []struct {
@@ -243,27 +245,13 @@ func TestListEntries(t *testing.T) {
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:    "OK_WithoutAccountID",
-			queries: map[string]string{},
-			buildStub: func(mockStore *mockdb.MockStore) {
-				arg := db.ListEntriesParams{
-					Limit:  5,
-					Offset: 0,
-				}
-				mockStore.EXPECT().ListEntries(gomock.Any(), gomock.Eq(arg)).Times(1).Return(entries, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recorder.Code)
-			},
-		},
-		{
-			name: "OK_WithAccountID",
+			name: "OK",
 			queries: map[string]string{
-				"accountId": "123",
+				"accountId": fmt.Sprintf("%d", accountID),
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListEntriesByAccountIDParams{
-					AccountID: 123,
+					AccountID: accountID,
 					Limit:     5,
 					Offset:    0,
 				}
@@ -276,28 +264,26 @@ func TestListEntries(t *testing.T) {
 		{
 			name: "OK_WithPagination",
 			queries: map[string]string{
-				"pageId":   "2",
-				"pageSize": "10",
+				"accountId": fmt.Sprintf("%d", accountID),
+				"pageId":    "2",
+				"pageSize":  "10",
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				arg := db.ListEntriesParams{
-					Limit:  10,
-					Offset: 10,
+				arg := db.ListEntriesByAccountIDParams{
+					AccountID: accountID,
+					Limit:     10,
+					Offset:    10,
 				}
-				mockStore.EXPECT().ListEntries(gomock.Any(), gomock.Eq(arg)).Times(1).Return(entries, nil)
+				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Eq(arg)).Times(1).Return(entries, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
 		{
-			name: "InvalidPageID",
-			queries: map[string]string{
-				"pageId":   "0",
-				"pageSize": "5",
-			},
+			name:    "MissingAccountID",
+			queries: map[string]string{},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().ListEntries(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -305,14 +291,30 @@ func TestListEntries(t *testing.T) {
 			},
 		},
 		{
-			name:    "InternalError",
-			queries: map[string]string{},
+			name: "InvalidPageID",
+			queries: map[string]string{
+				"accountId": fmt.Sprintf("%d", accountID),
+				"pageId":    "0",
+			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				arg := db.ListEntriesParams{
-					Limit:  5,
-					Offset: 0,
+				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "InternalError",
+			queries: map[string]string{
+				"accountId": fmt.Sprintf("%d", accountID),
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				arg := db.ListEntriesByAccountIDParams{
+					AccountID: accountID,
+					Limit:     5,
+					Offset:    0,
 				}
-				mockStore.EXPECT().ListEntries(gomock.Any(), gomock.Eq(arg)).Times(1).Return(nil, sql.ErrConnDone)
+				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Eq(arg)).Times(1).Return(nil, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
