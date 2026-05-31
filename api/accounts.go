@@ -9,7 +9,7 @@ import (
 )
 
 type createAccountRequest struct {
-	Name       string `json:"name" binding:"required"`
+	Name       string `json:"name" binding:"required,min=1,max=50"`
 	CurrencyID int16  `json:"currencyId" binding:"required,gt=0"`
 	Balance    int64  `json:"balance" binding:"required,gte=0"`
 }

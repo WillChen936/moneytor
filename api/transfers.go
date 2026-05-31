@@ -11,7 +11,7 @@ import (
 
 type createTransferRequest struct {
 	Name          string `json:"name" binding:"required,min=1,max=50"`
-	Note          string `json:"note"`
+	Note          string `json:"note" binding:"max=200"`
 	FromAccountID int64  `json:"fromAccountId" binding:"required,gt=0"`
 	ToAccountID   int64  `json:"toAccountId" binding:"required,gt=0"`
 	CategoryID    int64  `json:"categoryId" binding:"required"`

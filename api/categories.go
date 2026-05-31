@@ -10,7 +10,7 @@ import (
 )
 
 type createCategoryRequest struct {
-	Name              string `json:"name" binding:"required"`
+	Name              string `json:"name" binding:"required,min=1,max=50"`
 	TransactionTypeID int16  `json:"transactionTypeId" binding:"required,gt=0"`
 }
 

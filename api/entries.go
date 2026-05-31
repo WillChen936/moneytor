@@ -11,7 +11,7 @@ import (
 
 type createEntryRequest struct {
 	Name       string `json:"name" binding:"required,min=1,max=50"`
-	Note       string `json:"note"`
+	Note       string `json:"note" binding:"max=200"`
 	AccountID  int64  `json:"accountId" binding:"required"`
 	CategoryID int64  `json:"categoryId" binding:"required"`
 	Amount     int64  `json:"amount" binding:"required,gt=0"`
