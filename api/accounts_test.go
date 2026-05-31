@@ -10,9 +10,9 @@ import (
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
 	"net/http"
-	"time"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -26,6 +26,7 @@ func TestCreateAccount(t *testing.T) {
 	testCases := []struct {
 		name          string
 		requestBody   gin.H
+		setupAuth     func(t *testing.T, request *http.Request, server *Server)
 		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
@@ -35,6 +36,9 @@ func TestCreateAccount(t *testing.T) {
 				"name":       account.Name,
 				"currencyId": account.CurrencyID,
 				"balance":    account.Balance,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateAccountParams{
@@ -50,11 +54,30 @@ func TestCreateAccount(t *testing.T) {
 			},
 		},
 		{
+			name: "Unauthorized",
+			requestBody: gin.H{
+				"name":       account.Name,
+				"currencyId": account.CurrencyID,
+				"balance":    account.Balance,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "IllegalCurrencyID",
 			requestBody: gin.H{
 				"name":       account.Name,
 				"currencyId": -1,
 				"balance":    account.Balance,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
@@ -69,6 +92,9 @@ func TestCreateAccount(t *testing.T) {
 				"name":       account.Name,
 				"currencyId": math.MaxInt16,
 				"balance":    account.Balance,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.CreateAccountParams{
@@ -90,6 +116,9 @@ func TestCreateAccount(t *testing.T) {
 				"currencyId": account.CurrencyID,
 				"balance":    account.Balance,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(1).Return(db.Account{}, sql.ErrConnDone)
 			},
@@ -97,44 +126,29 @@ func TestCreateAccount(t *testing.T) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
-		{
-			name: "Unauthorized",
-			requestBody: gin.H{
-				"name":       account.Name,
-				"currencyId": account.CurrencyID,
-				"balance":    account.Balance,
-			},
-			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
 	}
 
 	for _, testCase := range testCases {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		mockStore := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockStore)
+			mockStore := mockdb.NewMockStore(ctrl)
+			testCase.buildStub(mockStore)
 
-		server := newTestServer(t, mockStore)
+			server := newTestServer(t, mockStore)
 
-		data, err := json.Marshal(testCase.requestBody)
-		require.NoError(t, err)
+			data, err := json.Marshal(testCase.requestBody)
+			require.NoError(t, err)
 
-		recorder := httptest.NewRecorder()
-		request, err := http.NewRequest(http.MethodPost, "/api/v1/accounts", bytes.NewReader(data))
-		require.NoError(t, err)
+			recorder := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodPost, "/api/v1/accounts", bytes.NewReader(data))
+			require.NoError(t, err)
 
-		if testCase.name != "Unauthorized" {
-			addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
-		}
-
-		server.router.ServeHTTP(recorder, request)
-		testCase.checkResponse(t, recorder)
+			testCase.setupAuth(t, request, server)
+			server.router.ServeHTTP(recorder, request)
+			testCase.checkResponse(t, recorder)
+		})
 	}
 }
 
@@ -148,12 +162,16 @@ func TestListAccounts(t *testing.T) {
 	testCases := []struct {
 		name          string
 		queries       map[string]string
+		setupAuth     func(t *testing.T, request *http.Request, server *Server)
 		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name:    "OK_WithoutParams",
 			queries: map[string]string{},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListAccounts(gomock.Any(), gomock.Any()).Times(1).Return(accounts, nil)
 			},
@@ -166,6 +184,9 @@ func TestListAccounts(t *testing.T) {
 			queries: map[string]string{
 				"pageId":   "3",
 				"pageSize": "10",
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListAccountsParams{
@@ -180,10 +201,25 @@ func TestListAccounts(t *testing.T) {
 			},
 		},
 		{
+			name: "Unauthorized",
+			queries: map[string]string{},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().ListAccounts(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "InvalidPageID",
 			queries: map[string]string{
 				"pageId":   "-1",
 				"pageSize": "10",
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListAccounts(gomock.Any(), gomock.Any()).Times(0)
@@ -197,6 +233,9 @@ func TestListAccounts(t *testing.T) {
 			queries: map[string]string{
 				"pageId":   "3",
 				"pageSize": "10",
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListAccountsParams{
@@ -213,28 +252,30 @@ func TestListAccounts(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		mockStore := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockStore)
+			mockStore := mockdb.NewMockStore(ctrl)
+			testCase.buildStub(mockStore)
 
-		server := newTestServer(t, mockStore)
+			server := newTestServer(t, mockStore)
 
-		recorder := httptest.NewRecorder()
-		request, err := http.NewRequest(http.MethodGet, "/api/v1/accounts", nil)
-		require.NoError(t, err)
+			recorder := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/v1/accounts", nil)
+			require.NoError(t, err)
 
-		addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			testCase.setupAuth(t, request, server)
 
-		queries := request.URL.Query()
-		for key, value := range testCase.queries {
-			queries.Add(key, value)
-		}
-		request.URL.RawQuery = queries.Encode()
+			queries := request.URL.Query()
+			for key, value := range testCase.queries {
+				queries.Add(key, value)
+			}
+			request.URL.RawQuery = queries.Encode()
 
-		server.router.ServeHTTP(recorder, request)
-		testCase.checkResponse(t, recorder)
+			server.router.ServeHTTP(recorder, request)
+			testCase.checkResponse(t, recorder)
+		})
 	}
 }
 

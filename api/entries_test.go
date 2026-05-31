@@ -9,9 +9,9 @@ import (
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
 	"net/http"
-	"time"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -41,6 +41,7 @@ func TestCreateEntry(t *testing.T) {
 	testCases := []struct {
 		name          string
 		requestBody   gin.H
+		setupAuth     func(t *testing.T, request *http.Request, server *Server)
 		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
@@ -52,6 +53,9 @@ func TestCreateEntry(t *testing.T) {
 				"accountId":  entryIncome.FromAccountID,
 				"categoryId": entryIncome.CategoryID,
 				"amount":     amount,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
@@ -80,6 +84,9 @@ func TestCreateEntry(t *testing.T) {
 				"categoryId": entryExpense.CategoryID,
 				"amount":     amount,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
 					ID:     categoryExpense.ID,
@@ -99,10 +106,32 @@ func TestCreateEntry(t *testing.T) {
 			},
 		},
 		{
+			name: "Unauthorized",
+			requestBody: gin.H{
+				"name":       entryIncome.Name,
+				"note":       entryIncome.Note,
+				"accountId":  entryIncome.FromAccountID,
+				"categoryId": entryIncome.CategoryID,
+				"amount":     amount,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).Times(0)
+				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "InvalidRequest",
 			requestBody: gin.H{
 				"name":   entryIncome.Name,
 				"amount": amount,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).Times(0)
@@ -120,6 +149,9 @@ func TestCreateEntry(t *testing.T) {
 				"accountId":  entryIncome.FromAccountID,
 				"categoryId": categoryIncome.ID,
 				"amount":     amount,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
@@ -140,6 +172,9 @@ func TestCreateEntry(t *testing.T) {
 				"accountId":  entryIncome.FromAccountID,
 				"categoryId": entryIncome.CategoryID,
 				"amount":     amount,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
@@ -168,6 +203,9 @@ func TestCreateEntry(t *testing.T) {
 				"categoryId": entryTransfer.CategoryID,
 				"amount":     amount,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
 					ID:     categoryTransfer.ID,
@@ -187,6 +225,9 @@ func TestCreateEntry(t *testing.T) {
 				"accountId":  entryIncome.FromAccountID,
 				"categoryId": entryIncome.CategoryID,
 				"amount":     amount,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
@@ -209,25 +250,26 @@ func TestCreateEntry(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		mockStore := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockStore)
+			mockStore := mockdb.NewMockStore(ctrl)
+			testCase.buildStub(mockStore)
 
-		server := newTestServer(t, mockStore)
+			server := newTestServer(t, mockStore)
 
-		data, err := json.Marshal(testCase.requestBody)
-		require.NoError(t, err)
+			data, err := json.Marshal(testCase.requestBody)
+			require.NoError(t, err)
 
-		recorder := httptest.NewRecorder()
-		request, err := http.NewRequest(http.MethodPost, "/api/v1/entries", bytes.NewReader(data))
-		require.NoError(t, err)
+			recorder := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodPost, "/api/v1/entries", bytes.NewReader(data))
+			require.NoError(t, err)
 
-		addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
-
-		server.router.ServeHTTP(recorder, request)
-		testCase.checkResponse(t, recorder)
+			testCase.setupAuth(t, request, server)
+			server.router.ServeHTTP(recorder, request)
+			testCase.checkResponse(t, recorder)
+		})
 	}
 }
 
@@ -242,6 +284,7 @@ func TestListEntries(t *testing.T) {
 	testCases := []struct {
 		name          string
 		queries       map[string]string
+		setupAuth     func(t *testing.T, request *http.Request, server *Server)
 		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
@@ -249,6 +292,9 @@ func TestListEntries(t *testing.T) {
 			name: "OK",
 			queries: map[string]string{
 				"accountId": fmt.Sprintf("%d", accountID),
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListEntriesByAccountIDParams{
@@ -269,6 +315,9 @@ func TestListEntries(t *testing.T) {
 				"pageId":    "2",
 				"pageSize":  "10",
 			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListEntriesByAccountIDParams{
 					AccountID: accountID,
@@ -282,8 +331,23 @@ func TestListEntries(t *testing.T) {
 			},
 		},
 		{
+			name:    "Unauthorized",
+			queries: map[string]string{"accountId": fmt.Sprintf("%d", accountID)},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name:    "MissingAccountID",
 			queries: map[string]string{},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -297,6 +361,9 @@ func TestListEntries(t *testing.T) {
 				"accountId": fmt.Sprintf("%d", accountID),
 				"pageId":    "0",
 			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -308,6 +375,9 @@ func TestListEntries(t *testing.T) {
 			name: "InternalError",
 			queries: map[string]string{
 				"accountId": fmt.Sprintf("%d", accountID),
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
 				arg := db.ListEntriesByAccountIDParams{
@@ -324,28 +394,30 @@ func TestListEntries(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		mockStore := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockStore)
+			mockStore := mockdb.NewMockStore(ctrl)
+			testCase.buildStub(mockStore)
 
-		server := newTestServer(t, mockStore)
+			server := newTestServer(t, mockStore)
 
-		recorder := httptest.NewRecorder()
-		request, err := http.NewRequest(http.MethodGet, "/api/v1/entries", nil)
-		require.NoError(t, err)
+			recorder := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/v1/entries", nil)
+			require.NoError(t, err)
 
-		addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			testCase.setupAuth(t, request, server)
 
-		q := request.URL.Query()
-		for k, v := range testCase.queries {
-			q.Add(k, v)
-		}
-		request.URL.RawQuery = q.Encode()
+			q := request.URL.Query()
+			for k, v := range testCase.queries {
+				q.Add(k, v)
+			}
+			request.URL.RawQuery = q.Encode()
 
-		server.router.ServeHTTP(recorder, request)
-		testCase.checkResponse(t, recorder)
+			server.router.ServeHTTP(recorder, request)
+			testCase.checkResponse(t, recorder)
+		})
 	}
 }
 
