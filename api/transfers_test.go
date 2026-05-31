@@ -109,6 +109,55 @@ func TestCreateTransfer(t *testing.T) {
 			},
 		},
 		{
+			name: "FromAccountNotFound",
+			requestBody: gin.H{
+				"name":          utils.RandomString(10),
+				"fromAccountId": fromAccount.ID,
+				"toAccountId":   toAccount.ID,
+				"categoryId":    categoryTransfer.ID,
+				"amount":        amount,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     fromAccount.ID,
+					UserID: userID,
+				}).Times(1).Return(db.Account{}, db.ErrRecordNotFound)
+				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).Times(0)
+				mockStore.EXPECT().CreateTransferTx(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusNotFound, recorder.Code)
+			},
+		},
+		{
+			name: "GetCategoryNotFound",
+			requestBody: gin.H{
+				"name":          utils.RandomString(10),
+				"fromAccountId": fromAccount.ID,
+				"toAccountId":   toAccount.ID,
+				"categoryId":    categoryTransfer.ID,
+				"amount":        amount,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     fromAccount.ID,
+					UserID: userID,
+				}).Times(1).Return(fromAccount, nil)
+				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).
+					Times(1).Return(db.Category{}, db.ErrRecordNotFound)
+				mockStore.EXPECT().CreateTransferTx(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusNotFound, recorder.Code)
+			},
+		},
+		{
 			name: "NonTransferCategory",
 			requestBody: gin.H{
 				"name":          utils.RandomString(10),
