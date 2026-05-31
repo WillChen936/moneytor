@@ -438,6 +438,7 @@ func TestListEntries(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
