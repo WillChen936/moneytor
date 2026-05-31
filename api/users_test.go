@@ -98,6 +98,62 @@ func TestRegister(t *testing.T) {
 			},
 		},
 		{
+			name: "PasswordTooLong",
+			requestBody: gin.H{
+				"username": user.Username,
+				"email":    user.Email,
+				"password": utils.RandomString(73),
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "UsernameTooShort",
+			requestBody: gin.H{
+				"username": "ab",
+				"email":    user.Email,
+				"password": password,
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "UsernameTooLong",
+			requestBody: gin.H{
+				"username": utils.RandomString(51),
+				"email":    user.Email,
+				"password": password,
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "EmailTooLong",
+			requestBody: gin.H{
+				"username": user.Username,
+				"email":    utils.RandomString(200) + "@test.com",
+				"password": password,
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
 			name: "InternalError",
 			requestBody: gin.H{
 				"username": user.Username,
