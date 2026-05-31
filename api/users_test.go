@@ -275,6 +275,19 @@ func TestLogin(t *testing.T) {
 			},
 		},
 		{
+			name: "PasswordTooLong",
+			requestBody: gin.H{
+				"email":    user.Email,
+				"password": utils.RandomString(73),
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetUserByEmail(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
 			name: "InternalError",
 			requestBody: gin.H{
 				"email":    user.Email,
