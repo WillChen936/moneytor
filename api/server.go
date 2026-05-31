@@ -46,6 +46,7 @@ func NewServer(store db.Store, config utils.Config) (*Server, error) {
 	auth.GET("categories", server.listCategories)
 	auth.POST("entries", server.createEntry)
 	auth.GET("entries", server.listEntries)
+	auth.POST("transfers", server.createTransfer)
 
 	server.router = router
 	return server, nil

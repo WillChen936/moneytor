@@ -7,16 +7,16 @@ import (
 )
 
 type CreateEntryTxParams struct {
-	Name       string
-	Note       string
-	AccountID  int64
-	CategoryID int64
-	Amount     int64
+	Name          string
+	Note          string
+	FromAccountID int64
+	CategoryID    int64
+	Amount        int64
 }
 
 type CreateEntryTxResult struct {
-	Entry   Entry
-	Account Account
+	Entry       Entry
+	FromAccount Account
 }
 
 // CreateEntryTx creates an entry and updates the account balance (balance + amount).
@@ -30,7 +30,7 @@ func (store *SQLStore) CreateEntryTx(ctx context.Context, arg CreateEntryTxParam
 		result.Entry, err = q.CreateEntry(ctx, CreateEntryParams{
 			Name:          arg.Name,
 			Note:          arg.Note,
-			FromAccountID: arg.AccountID,
+			FromAccountID: arg.FromAccountID,
 			ToAccountID:   pgtype.Int8{Valid: false},
 			CategoryID:    arg.CategoryID,
 			Amount:        arg.Amount,
@@ -39,15 +39,11 @@ func (store *SQLStore) CreateEntryTx(ctx context.Context, arg CreateEntryTxParam
 			return err
 		}
 
-		result.Account, err = q.UpdateAccountBalance(ctx, UpdateAccountBalanceParams{
-			ID:     arg.AccountID,
+		result.FromAccount, err = q.UpdateAccountBalance(ctx, UpdateAccountBalanceParams{
+			ID:     arg.FromAccountID,
 			Amount: arg.Amount,
 		})
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	})
 
 	return result, err

@@ -42,11 +42,11 @@ func (server *Server) createEntry(ctx *gin.Context) {
 	}
 
 	arg := db.CreateEntryTxParams{
-		Name:       req.Name,
-		Note:       req.Note,
-		AccountID:  req.AccountID,
-		CategoryID: req.CategoryID,
-		Amount:     amount,
+		Name:          req.Name,
+		Note:          req.Note,
+		FromAccountID: req.AccountID,
+		CategoryID:    req.CategoryID,
+		Amount:        amount,
 	}
 
 	result, err := server.store.CreateEntryTx(ctx, arg)
@@ -98,7 +98,7 @@ func resolverEntryAmount(transactionTypeID int16, rawAmount int64) (int64, error
 		return -1 * rawAmount, nil
 	case TransactionTypeIncome:
 		return 1 * rawAmount, nil
-	default:
+default:
 		return 0, fmt.Errorf("invalid transaction type: %d", transactionTypeID)
 	}
 }

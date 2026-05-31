@@ -117,6 +117,21 @@ func (mr *MockStoreMockRecorder) CreateSession(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockStore)(nil).CreateSession), ctx, arg)
 }
 
+// CreateTransferTx mocks base method.
+func (m *MockStore) CreateTransferTx(ctx context.Context, arg db.CreateTransferTxParams) (db.CreateTransferTxResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTransferTx", ctx, arg)
+	ret0, _ := ret[0].(db.CreateTransferTxResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTransferTx indicates an expected call of CreateTransferTx.
+func (mr *MockStoreMockRecorder) CreateTransferTx(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransferTx", reflect.TypeOf((*MockStore)(nil).CreateTransferTx), ctx, arg)
+}
+
 // CreateUser mocks base method.
 func (m *MockStore) CreateUser(ctx context.Context, arg db.CreateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()

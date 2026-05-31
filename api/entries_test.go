@@ -28,15 +28,11 @@ func TestCreateEntry(t *testing.T) {
 	categoryIncome.TransactionTypeID = TransactionTypeIncome
 	categoryExpense := createRandomCategoryForUser(userID)
 	categoryExpense.TransactionTypeID = TransactionTypeExpense
-	categoryTransfer := createRandomCategoryForUser(userID)
-	categoryTransfer.TransactionTypeID = TransactionTypeTransfer
 
 	entryIncome := createRandomEntry(account.ID, categoryIncome.ID)
 	entryIncome.Amount = amount
 	entryExpense := createRandomEntry(account.ID, categoryExpense.ID)
 	entryExpense.Amount = amount
-	entryTransfer := createRandomEntry(account.ID, categoryTransfer.ID)
-	entryTransfer.Amount = amount
 
 	testCases := []struct {
 		name          string
@@ -65,11 +61,11 @@ func TestCreateEntry(t *testing.T) {
 				arg := db.CreateEntryTxParams{
 					Name:       entryIncome.Name,
 					Note:       entryIncome.Note,
-					AccountID:  entryIncome.FromAccountID,
+					FromAccountID: entryIncome.FromAccountID,
 					CategoryID: entryIncome.CategoryID,
 					Amount:     amount,
 				}
-				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.CreateEntryTxResult{Entry: entryIncome, Account: account}, nil)
+				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.CreateEntryTxResult{Entry: entryIncome, FromAccount: account}, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -93,13 +89,13 @@ func TestCreateEntry(t *testing.T) {
 					UserID: userID,
 				}).Times(1).Return(categoryExpense, nil)
 				arg := db.CreateEntryTxParams{
-					Name:       entryExpense.Name,
-					Note:       entryExpense.Note,
-					AccountID:  entryExpense.FromAccountID,
-					CategoryID: entryExpense.CategoryID,
-					Amount:     -amount,
+					Name:          entryExpense.Name,
+					Note:          entryExpense.Note,
+					FromAccountID: entryExpense.FromAccountID,
+					CategoryID:    entryExpense.CategoryID,
+					Amount:        -amount,
 				}
-				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.CreateEntryTxResult{Entry: entryExpense, Account: account}, nil)
+				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.CreateEntryTxResult{Entry: entryExpense, FromAccount: account}, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -184,7 +180,7 @@ func TestCreateEntry(t *testing.T) {
 				arg := db.CreateEntryTxParams{
 					Name:       entryIncome.Name,
 					Note:       entryIncome.Note,
-					AccountID:  entryIncome.FromAccountID,
+					FromAccountID: entryIncome.FromAccountID,
 					CategoryID: entryIncome.CategoryID,
 					Amount:     amount,
 				}
@@ -197,20 +193,19 @@ func TestCreateEntry(t *testing.T) {
 		{
 			name: "InvalidTransactionTypeID",
 			requestBody: gin.H{
-				"name":       entryTransfer.Name,
-				"note":       entryTransfer.Note,
-				"accountId":  entryTransfer.FromAccountID,
-				"categoryId": entryTransfer.CategoryID,
+				"name":       utils.RandomString(10),
+				"accountId":  account.ID,
+				"categoryId": utils.RandomInt64Range(1, 1000),
 				"amount":     amount,
 			},
 			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
-					ID:     categoryTransfer.ID,
-					UserID: userID,
-				}).Times(1).Return(categoryTransfer, nil)
+				transferCategory := createRandomCategoryForUser(userID)
+				transferCategory.TransactionTypeID = TransactionTypeTransfer
+				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).
+					Times(1).Return(transferCategory, nil)
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -237,7 +232,7 @@ func TestCreateEntry(t *testing.T) {
 				arg := db.CreateEntryTxParams{
 					Name:       entryIncome.Name,
 					Note:       entryIncome.Note,
-					AccountID:  entryIncome.FromAccountID,
+					FromAccountID: entryIncome.FromAccountID,
 					CategoryID: entryIncome.CategoryID,
 					Amount:     amount,
 				}

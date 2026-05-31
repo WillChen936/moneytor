@@ -10,6 +10,7 @@ import (
 type Store interface {
 	Querier
 	CreateEntryTx(ctx context.Context, arg CreateEntryTxParams) (CreateEntryTxResult, error)
+	CreateTransferTx(ctx context.Context, arg CreateTransferTxParams) (CreateTransferTxResult, error)
 }
 
 type SQLStore struct {
