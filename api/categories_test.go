@@ -102,7 +102,7 @@ func TestCreateCategory(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server, maker := newTestServer(t, mockStore)
+		server := newTestServer(t, mockStore)
 
 		data, err := json.Marshal(testCase.requestBody)
 		require.NoError(t, err)
@@ -111,7 +111,7 @@ func TestCreateCategory(t *testing.T) {
 		request, err := http.NewRequest(http.MethodPost, "/api/v1/categories", bytes.NewReader(data))
 		require.NoError(t, err)
 
-		addAuthorization(t, request, maker, userID)
+		addAuthorization(t, request, server, userID)
 
 		server.router.ServeHTTP(recorder, request)
 		testCase.checkResponse(t, recorder)
@@ -199,13 +199,13 @@ func TestListCategory(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server, maker := newTestServer(t, mockStore)
+		server := newTestServer(t, mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/categories", nil)
 		require.NoError(t, err)
 
-		addAuthorization(t, request, maker, userID)
+		addAuthorization(t, request, server, userID)
 
 		queries := request.URL.Query()
 		for key, value := range testCase.Queries {

@@ -14,16 +14,18 @@ import (
 )
 
 func TestListCurrencies(t *testing.T) {
-	userID := utils.RandomInt64Range(1, 1000)
-	currencies := []db.Currency{createRandomCurrency()}
+	currencies := make([]db.Currency, 5)
+	for i := range currencies {
+		currencies[i] = createRandomCurrency()
+	}
 
 	testCases := []struct {
-		Name          string
+		name          string
 		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			Name: "OK",
+			name: "OK",
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListCurrencies(gomock.Any()).Times(1).Return(currencies, nil)
 			},
@@ -32,7 +34,7 @@ func TestListCurrencies(t *testing.T) {
 			},
 		},
 		{
-			Name: "InternalError",
+			name: "InternalError",
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListCurrencies(gomock.Any()).Times(1).Return([]db.Currency{}, sql.ErrConnDone)
 			},
@@ -43,22 +45,22 @@ func TestListCurrencies(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		mockStore := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockStore)
+			mockStore := mockdb.NewMockStore(ctrl)
+			testCase.buildStub(mockStore)
 
-		server, maker := newTestServer(t, mockStore)
+			server := newTestServer(t, mockStore)
 
-		recorder := httptest.NewRecorder()
-		request, err := http.NewRequest(http.MethodGet, "/api/v1/currencies", nil)
-		require.NoError(t, err)
+			recorder := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/v1/currencies", nil)
+			require.NoError(t, err)
 
-		addAuthorization(t, request, maker, userID)
-
-		server.router.ServeHTTP(recorder, request)
-		testCase.checkResponse(t, recorder)
+			server.router.ServeHTTP(recorder, request)
+			testCase.checkResponse(t, recorder)
+		})
 	}
 }
 

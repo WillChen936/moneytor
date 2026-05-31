@@ -46,6 +46,23 @@
 - **問題**: 僅在 `api` package 內部使用，不應對外暴露
 - **修法**: 改為小寫 `resolverEntryAmount`，同步更新測試
 
+## 測試待修項目
+
+### api/ 層
+
+#### 缺少測試檔案
+- `api/users_test.go`：register、login、refresh 三個 handler 完全沒有測試
+- `api/middleware_test.go`：authMiddleware 完全沒有測試（缺 header、格式錯誤、token 無效、token 有效等 case）
+
+#### 現有測試缺漏
+- `api/categories_test.go`：`TestCreateCategory` 缺少 `Unauthorized` test case
+- `api/transactiontypes_test.go`：缺少 `Unauthorized` test case；struct 有多餘的 `Queries` 欄位
+
+#### 小問題
+- `api/categories_test.go`：test case 名稱 typo（`IlleagalTranscationTypeID`、`InvalidTranscationTypeID`）
+
+---
+
 ## 未完成功能
 
 ### 4. Transfer 類型未完整實作

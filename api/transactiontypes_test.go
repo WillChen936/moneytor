@@ -14,19 +14,18 @@ import (
 )
 
 func TestListTransactionType(t *testing.T) {
-	transactionTypes := []db.TransactionType{}
-	for i := 0; i < 1; i++ {
-		transactionTypes = append(transactionTypes, createRandomTransactionType())
+	transactionTypes := make([]db.TransactionType, 3)
+	for i := range transactionTypes {
+		transactionTypes[i] = createRandomTransactionType()
 	}
 
 	testCases := []struct {
-		Name          string
-		Queries       map[string]string
+		name          string
 		buildStub     func(mockStore *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			Name: "OK",
+			name: "OK",
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListTransactionTypes(gomock.Any()).Times(1).Return(transactionTypes, nil)
 			},
@@ -35,7 +34,7 @@ func TestListTransactionType(t *testing.T) {
 			},
 		},
 		{
-			Name: "InternalError",
+			name: "InternalError",
 			buildStub: func(mockStore *mockdb.MockStore) {
 				mockStore.EXPECT().ListTransactionTypes(gomock.Any()).Times(1).Return([]db.TransactionType{}, sql.ErrConnDone)
 			},
@@ -46,23 +45,22 @@ func TestListTransactionType(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		mockStore := mockdb.NewMockStore(ctrl)
-		testCase.buildStub(mockStore)
+			mockStore := mockdb.NewMockStore(ctrl)
+			testCase.buildStub(mockStore)
 
-		server, maker := newTestServer(t, mockStore)
+			server := newTestServer(t, mockStore)
 
-		recorder := httptest.NewRecorder()
-		request, err := http.NewRequest(http.MethodGet, "/api/v1/transaction-types", nil)
-		require.NoError(t, err)
+			recorder := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/v1/transaction-types", nil)
+			require.NoError(t, err)
 
-		addAuthorization(t, request, maker, utils.RandomInt64Range(1, 1000))
-
-		server.router.ServeHTTP(recorder, request)
-
-		testCase.checkResponse(t, recorder)
+			server.router.ServeHTTP(recorder, request)
+			testCase.checkResponse(t, recorder)
+		})
 	}
 }
 

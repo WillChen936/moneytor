@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	db "moneytor/database/sqlc"
 	"moneytor/token"
 	"moneytor/utils"
@@ -15,7 +16,12 @@ type Server struct {
 	router     *gin.Engine
 }
 
-func NewServer(store db.Store, config utils.Config, tokenMaker token.Maker) *Server {
+func NewServer(store db.Store, config utils.Config) (*Server, error) {
+	tokenMaker, err := token.NewJWTMaker(config.TokenSecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
+
 	server := &Server{
 		store:      store,
 		tokenMaker: tokenMaker,
@@ -29,6 +35,8 @@ func NewServer(store db.Store, config utils.Config, tokenMaker token.Maker) *Ser
 	v1.POST("users", server.register)
 	v1.POST("users/login", server.login)
 	v1.POST("users/refresh", server.refresh)
+	v1.GET("transaction-types", server.listTransactionTypes)
+	v1.GET("currencies", server.listCurrencies)
 
 	auth := v1.Group("/").Use(authMiddleware(tokenMaker))
 
@@ -36,13 +44,11 @@ func NewServer(store db.Store, config utils.Config, tokenMaker token.Maker) *Ser
 	auth.GET("accounts", server.listAccounts)
 	auth.POST("categories", server.createCategory)
 	auth.GET("categories", server.listCategories)
-	auth.GET("transaction-types", server.listTransactionTypes)
 	auth.POST("entries", server.createEntry)
 	auth.GET("entries", server.listEntries)
-	auth.GET("currencies", server.listCurrencies)
 
 	server.router = router
-	return server
+	return server, nil
 }
 
 func (s *Server) Start(address string) error {

@@ -119,7 +119,7 @@ func TestCreateAccount(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server, maker := newTestServer(t, mockStore)
+		server := newTestServer(t, mockStore)
 
 		data, err := json.Marshal(testCase.requestBody)
 		require.NoError(t, err)
@@ -129,7 +129,7 @@ func TestCreateAccount(t *testing.T) {
 		require.NoError(t, err)
 
 		if testCase.name != "Unauthorized" {
-			addAuthorization(t, request, maker, userID)
+			addAuthorization(t, request, server, userID)
 		}
 
 		server.router.ServeHTTP(recorder, request)
@@ -218,13 +218,13 @@ func TestListAccounts(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server, maker := newTestServer(t, mockStore)
+		server := newTestServer(t, mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/accounts", nil)
 		require.NoError(t, err)
 
-		addAuthorization(t, request, maker, userID)
+		addAuthorization(t, request, server, userID)
 
 		queries := request.URL.Query()
 		for key, value := range testCase.queries {

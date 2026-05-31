@@ -214,7 +214,7 @@ func TestCreateEntry(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server, maker := newTestServer(t, mockStore)
+		server := newTestServer(t, mockStore)
 
 		data, err := json.Marshal(testCase.requestBody)
 		require.NoError(t, err)
@@ -223,7 +223,7 @@ func TestCreateEntry(t *testing.T) {
 		request, err := http.NewRequest(http.MethodPost, "/api/v1/entries", bytes.NewReader(data))
 		require.NoError(t, err)
 
-		addAuthorization(t, request, maker, userID)
+		addAuthorization(t, request, server, userID)
 
 		server.router.ServeHTTP(recorder, request)
 		testCase.checkResponse(t, recorder)
@@ -329,13 +329,13 @@ func TestListEntries(t *testing.T) {
 		mockStore := mockdb.NewMockStore(ctrl)
 		testCase.buildStub(mockStore)
 
-		server, maker := newTestServer(t, mockStore)
+		server := newTestServer(t, mockStore)
 
 		recorder := httptest.NewRecorder()
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/entries", nil)
 		require.NoError(t, err)
 
-		addAuthorization(t, request, maker, userID)
+		addAuthorization(t, request, server, userID)
 
 		q := request.URL.Query()
 		for k, v := range testCase.queries {
