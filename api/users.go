@@ -12,9 +12,9 @@ import (
 )
 
 type registerRequest struct {
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
+	Username string `json:"username" binding:"required,min=3,max=50"`
+	Email    string `json:"email" binding:"required,email,max=200"`
+	Password string `json:"password" binding:"required,min=6,max=72"`
 }
 
 type userResponse struct {

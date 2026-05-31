@@ -69,6 +69,23 @@ func TestCreateAccount(t *testing.T) {
 			},
 		},
 		{
+			name: "BalanceTooLarge",
+			requestBody: gin.H{
+				"name":       account.Name,
+				"currencyId": account.CurrencyID,
+				"balance":    int64(1000000000000),
+			},
+			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
+				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
+			},
+			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
 			name: "IllegalCurrencyID",
 			requestBody: gin.H{
 				"name":       account.Name,
