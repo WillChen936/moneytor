@@ -21,7 +21,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
-	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.CreateAccountParams{
 		UserID:     payload.UserID,
@@ -55,7 +55,7 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 		return
 	}
 
-	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.ListAccountsParams{
 		UserID: payload.UserID,

@@ -9,6 +9,7 @@ import (
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
 	"net/http"
+	"time"
 	"net/http/httptest"
 	"testing"
 
@@ -223,7 +224,7 @@ func TestCreateEntry(t *testing.T) {
 		request, err := http.NewRequest(http.MethodPost, "/api/v1/entries", bytes.NewReader(data))
 		require.NoError(t, err)
 
-		addAuthorization(t, request, server, userID)
+		addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 
 		server.router.ServeHTTP(recorder, request)
 		testCase.checkResponse(t, recorder)
@@ -335,7 +336,7 @@ func TestListEntries(t *testing.T) {
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/entries", nil)
 		require.NoError(t, err)
 
-		addAuthorization(t, request, server, userID)
+		addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 
 		q := request.URL.Query()
 		for k, v := range testCase.queries {

@@ -10,6 +10,7 @@ import (
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
 	"net/http"
+	"time"
 	"net/http/httptest"
 	"testing"
 
@@ -129,7 +130,7 @@ func TestCreateAccount(t *testing.T) {
 		require.NoError(t, err)
 
 		if testCase.name != "Unauthorized" {
-			addAuthorization(t, request, server, userID)
+			addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 		}
 
 		server.router.ServeHTTP(recorder, request)
@@ -224,7 +225,7 @@ func TestListAccounts(t *testing.T) {
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/accounts", nil)
 		require.NoError(t, err)
 
-		addAuthorization(t, request, server, userID)
+		addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 
 		queries := request.URL.Query()
 		for key, value := range testCase.queries {

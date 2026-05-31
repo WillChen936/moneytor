@@ -3,7 +3,6 @@ package api
 import (
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
-	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -29,10 +28,4 @@ func newTestServer(t *testing.T, store db.Store) *Server {
 	require.NoError(t, err)
 
 	return server
-}
-
-func addAuthorization(t *testing.T, request *http.Request, server *Server, userID int64) {
-	tokenStr, _, err := server.tokenMaker.CreateToken(userID, time.Minute)
-	require.NoError(t, err)
-	request.Header.Set("Authorization", "Bearer "+tokenStr)
 }

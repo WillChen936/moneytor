@@ -21,7 +21,7 @@ func (server *Server) createCategory(ctx *gin.Context) {
 		return
 	}
 
-	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.CreateCategoryParams{
 		UserID:            payload.UserID,
@@ -54,7 +54,7 @@ func (server *Server) listCategories(ctx *gin.Context) {
 		return
 	}
 
-	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.ListCategoriesParams{
 		UserID: payload.UserID,

@@ -9,18 +9,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const authPayloadKey = "auth_payload"
+const (
+	authorizationHeaderKey  = "authorization"
+	authorizationTypeBearer = "bearer"
+	authorizationPayloadKey = "authorization_payload"
+)
 
 func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authHeader := ctx.GetHeader("Authorization")
+		authHeader := ctx.GetHeader(authorizationHeaderKey)
 		if len(authHeader) == 0 {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(errors.New("authorization header is missing")))
 			return
 		}
 
 		fields := strings.Fields(authHeader)
-		if len(fields) != 2 || !strings.EqualFold(fields[0], "bearer") {
+		if len(fields) != 2 || !strings.EqualFold(fields[0], authorizationTypeBearer) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse(errors.New("invalid authorization header format")))
 			return
 		}
@@ -31,7 +35,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			return
 		}
 
-		ctx.Set(authPayloadKey, payload)
+		ctx.Set(authorizationPayloadKey, payload)
 		ctx.Next()
 	}
 }

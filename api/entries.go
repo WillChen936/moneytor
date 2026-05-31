@@ -24,7 +24,7 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		return
 	}
 
-	payload := ctx.MustGet(authPayloadKey).(*token.Payload)
+	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	category, err := server.store.GetCategory(ctx, db.GetCategoryParams{
 		ID:     req.CategoryID,

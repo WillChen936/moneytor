@@ -8,6 +8,7 @@ import (
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
 	"net/http"
+	"time"
 	"net/http/httptest"
 	"testing"
 
@@ -111,7 +112,7 @@ func TestCreateCategory(t *testing.T) {
 		request, err := http.NewRequest(http.MethodPost, "/api/v1/categories", bytes.NewReader(data))
 		require.NoError(t, err)
 
-		addAuthorization(t, request, server, userID)
+		addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 
 		server.router.ServeHTTP(recorder, request)
 		testCase.checkResponse(t, recorder)
@@ -205,7 +206,7 @@ func TestListCategory(t *testing.T) {
 		request, err := http.NewRequest(http.MethodGet, "/api/v1/categories", nil)
 		require.NoError(t, err)
 
-		addAuthorization(t, request, server, userID)
+		addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 
 		queries := request.URL.Query()
 		for key, value := range testCase.Queries {
