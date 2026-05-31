@@ -174,6 +174,11 @@ func (server *Server) refresh(ctx *gin.Context) {
 		return
 	}
 
+	if time.Now().After(session.ExpiresAt) {
+		ctx.JSON(http.StatusUnauthorized, errResponse(errors.New("session has expired")))
+		return
+	}
+
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(session.UserID, server.config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))

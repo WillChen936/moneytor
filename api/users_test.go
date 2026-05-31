@@ -343,6 +343,23 @@ func TestRefresh(t *testing.T) {
 			},
 		},
 		{
+			name: "SessionExpired",
+			buildStub: func(mockStore *mockdb.MockStore, refreshToken string) {
+				mockStore.EXPECT().
+					GetSession(gomock.Any(), sessionID).
+					Times(1).
+					Return(db.Session{
+						ID:           sessionID,
+						UserID:       user.ID,
+						RefreshToken: refreshToken,
+						ExpiresAt:    time.Now().Add(-time.Hour),
+					}, nil)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "InternalError",
 			buildStub: func(mockStore *mockdb.MockStore, refreshToken string) {
 				mockStore.EXPECT().

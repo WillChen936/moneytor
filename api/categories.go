@@ -62,11 +62,11 @@ func (server *Server) listCategories(ctx *gin.Context) {
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	category, err := server.store.ListCategories(ctx, arg)
+	categories, err := server.store.ListCategories(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, category)
+	ctx.JSON(http.StatusOK, categories)
 }

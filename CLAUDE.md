@@ -49,7 +49,8 @@ database/
   queries/            — raw SQL used by sqlc to generate Go code
   sqlc/               — generated code (DO NOT edit *.sql.go)
     store.go          — Store interface + SQLStore; custom transactions go here
-    tx_create_entry.go — example transaction: creates entry + updates balance
+    tx_create_entry.go    — income/expense transaction: creates entry + updates account balance
+    tx_create_transfer.go — transfer transaction: creates entry + updates two accounts (deadlock-safe)
   mocks/store.go      — mockgen-generated mock of Store (used in api tests)
 ```
 
