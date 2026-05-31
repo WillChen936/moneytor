@@ -56,6 +56,10 @@ func (s *Server) Start(address string) error {
 	return s.router.Run(address)
 }
 
+func (s *Server) Router() *gin.Engine {
+	return s.router
+}
+
 func errResponse(err error) gin.H {
 	return gin.H{"error": err.Error()}
 }

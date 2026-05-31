@@ -2,10 +2,15 @@ package main
 
 import (
 	"context"
+	"errors"
 	"moneytor/api"
 	db "moneytor/database/sqlc"
 	"moneytor/utils"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -37,7 +42,31 @@ func main() {
 		log.Fatal().Err(err).Msg("Unable to create server")
 	}
 
-	if err := server.Start(config.HttpServerAddress); err != nil {
-		log.Fatal().Err(err).Msg("Unable to start server")
+	httpServer := &http.Server{
+		Addr:    config.HttpServerAddress,
+		Handler: server.Router(),
 	}
+
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal().Err(err).Msg("Unable to start server")
+		}
+	}()
+
+	log.Info().Msgf("server started at %s", config.HttpServerAddress)
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Info().Msg("shutting down server...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		log.Fatal().Err(err).Msg("server forced to shutdown")
+	}
+
+	log.Info().Msg("server exited")
 }
