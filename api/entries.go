@@ -14,7 +14,7 @@ type createEntryRequest struct {
 	Note       string `json:"note" binding:"max=200"`
 	AccountID  int64  `json:"accountId" binding:"required"`
 	CategoryID int64  `json:"categoryId" binding:"required"`
-	Amount     int64  `json:"amount" binding:"required,gt=0"`
+	Amount     int64  `json:"amount" binding:"required,gt=0,lte=999999999999"`
 }
 
 func (server *Server) createEntry(ctx *gin.Context) {
