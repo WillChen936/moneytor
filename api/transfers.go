@@ -32,6 +32,15 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 
 	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
+	_, err := server.store.GetAccount(ctx, db.GetAccountParams{
+		ID:     req.FromAccountID,
+		UserID: payload.UserID,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, errResponse(err))
+		return
+	}
+
 	category, err := server.store.GetCategory(ctx, db.GetCategoryParams{
 		ID:     req.CategoryID,
 		UserID: payload.UserID,

@@ -46,6 +46,10 @@ func TestCreateTransfer(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     fromAccount.ID,
+					UserID: userID,
+				}).Times(1).Return(fromAccount, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
 					ID:     categoryTransfer.ID,
 					UserID: userID,
@@ -75,6 +79,7 @@ func TestCreateTransfer(t *testing.T) {
 			},
 			setupAuth: func(t *testing.T, request *http.Request, server *Server) {},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().CreateTransferTx(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -95,6 +100,7 @@ func TestCreateTransfer(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().CreateTransferTx(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -117,6 +123,10 @@ func TestCreateTransfer(t *testing.T) {
 			buildStub: func(mockStore *mockdb.MockStore) {
 				expenseCategory := createRandomCategory(userID)
 				expenseCategory.TransactionTypeID = TransactionTypeExpense
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     fromAccount.ID,
+					UserID: userID,
+				}).Times(1).Return(fromAccount, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).
 					Times(1).Return(expenseCategory, nil)
 				mockStore.EXPECT().CreateTransferTx(gomock.Any(), gomock.Any()).Times(0)
@@ -138,10 +148,16 @@ func TestCreateTransfer(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     fromAccount.ID,
+					UserID: userID,
+				}).Times(1).Return(fromAccount, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).
 					Times(1).Return(categoryTransfer, nil)
-				mockStore.EXPECT().GetAccount(gomock.Any(), gomock.Any()).
-					Times(1).Return(db.Account{}, db.ErrRecordNotFound)
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     toAccount.ID,
+					UserID: userID,
+				}).Times(1).Return(db.Account{}, db.ErrRecordNotFound)
 				mockStore.EXPECT().CreateTransferTx(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -161,10 +177,16 @@ func TestCreateTransfer(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     fromAccount.ID,
+					UserID: userID,
+				}).Times(1).Return(fromAccount, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).
 					Times(1).Return(categoryTransfer, nil)
-				mockStore.EXPECT().GetAccount(gomock.Any(), gomock.Any()).
-					Times(1).Return(toAccount, nil)
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     toAccount.ID,
+					UserID: userID,
+				}).Times(1).Return(toAccount, nil)
 				mockStore.EXPECT().CreateTransferTx(gomock.Any(), gomock.Any()).
 					Times(1).Return(db.CreateTransferTxResult{}, sql.ErrConnDone)
 			},

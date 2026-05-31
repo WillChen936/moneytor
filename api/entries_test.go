@@ -54,16 +54,20 @@ func TestCreateEntry(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     account.ID,
+					UserID: userID,
+				}).Times(1).Return(account, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
 					ID:     categoryIncome.ID,
 					UserID: userID,
 				}).Times(1).Return(categoryIncome, nil)
 				arg := db.CreateEntryTxParams{
-					Name:       entryIncome.Name,
-					Note:       entryIncome.Note,
+					Name:          entryIncome.Name,
+					Note:          entryIncome.Note,
 					FromAccountID: entryIncome.FromAccountID,
-					CategoryID: entryIncome.CategoryID,
-					Amount:     amount,
+					CategoryID:    entryIncome.CategoryID,
+					Amount:        amount,
 				}
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.CreateEntryTxResult{Entry: entryIncome, FromAccount: account}, nil)
 			},
@@ -84,6 +88,10 @@ func TestCreateEntry(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     account.ID,
+					UserID: userID,
+				}).Times(1).Return(account, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
 					ID:     categoryExpense.ID,
 					UserID: userID,
@@ -113,6 +121,7 @@ func TestCreateEntry(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -130,6 +139,7 @@ func TestCreateEntry(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -150,6 +160,10 @@ func TestCreateEntry(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     account.ID,
+					UserID: userID,
+				}).Times(1).Return(account, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
 					ID:     categoryIncome.ID,
 					UserID: userID,
@@ -173,16 +187,20 @@ func TestCreateEntry(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     account.ID,
+					UserID: userID,
+				}).Times(1).Return(account, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
 					ID:     categoryIncome.ID,
 					UserID: userID,
 				}).Times(1).Return(categoryIncome, nil)
 				arg := db.CreateEntryTxParams{
-					Name:       entryIncome.Name,
-					Note:       entryIncome.Note,
+					Name:          entryIncome.Name,
+					Note:          entryIncome.Note,
 					FromAccountID: entryIncome.FromAccountID,
-					CategoryID: entryIncome.CategoryID,
-					Amount:     amount,
+					CategoryID:    entryIncome.CategoryID,
+					Amount:        amount,
 				}
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.CreateEntryTxResult{}, db.ErrForeignKeyViolation)
 			},
@@ -204,6 +222,10 @@ func TestCreateEntry(t *testing.T) {
 			buildStub: func(mockStore *mockdb.MockStore) {
 				transferCategory := createRandomCategory(userID)
 				transferCategory.TransactionTypeID = TransactionTypeTransfer
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     account.ID,
+					UserID: userID,
+				}).Times(1).Return(account, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).
 					Times(1).Return(transferCategory, nil)
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Any()).Times(0)
@@ -225,16 +247,20 @@ func TestCreateEntry(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     account.ID,
+					UserID: userID,
+				}).Times(1).Return(account, nil)
 				mockStore.EXPECT().GetCategory(gomock.Any(), db.GetCategoryParams{
 					ID:     categoryIncome.ID,
 					UserID: userID,
 				}).Times(1).Return(categoryIncome, nil)
 				arg := db.CreateEntryTxParams{
-					Name:       entryIncome.Name,
-					Note:       entryIncome.Note,
+					Name:          entryIncome.Name,
+					Note:          entryIncome.Note,
 					FromAccountID: entryIncome.FromAccountID,
-					CategoryID: entryIncome.CategoryID,
-					Amount:     amount,
+					CategoryID:    entryIncome.CategoryID,
+					Amount:        amount,
 				}
 				mockStore.EXPECT().CreateEntryTx(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.CreateEntryTxResult{}, sql.ErrConnDone)
 			},
@@ -292,6 +318,10 @@ func TestListEntries(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     accountID,
+					UserID: userID,
+				}).Times(1).Return(db.Account{ID: accountID}, nil)
 				arg := db.ListEntriesByAccountIDParams{
 					AccountID: accountID,
 					Limit:     5,
@@ -314,6 +344,10 @@ func TestListEntries(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     accountID,
+					UserID: userID,
+				}).Times(1).Return(db.Account{ID: accountID}, nil)
 				arg := db.ListEntriesByAccountIDParams{
 					AccountID: accountID,
 					Limit:     10,
@@ -331,6 +365,7 @@ func TestListEntries(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, server *Server) {
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Times(0)
 				mockStore.EXPECT().ListEntriesByAccountID(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -375,6 +410,10 @@ func TestListEntries(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
+				mockStore.EXPECT().GetAccount(gomock.Any(), db.GetAccountParams{
+					ID:     accountID,
+					UserID: userID,
+				}).Times(1).Return(db.Account{ID: accountID}, nil)
 				arg := db.ListEntriesByAccountIDParams{
 					AccountID: accountID,
 					Limit:     5,

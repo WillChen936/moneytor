@@ -26,6 +26,15 @@ func (server *Server) createEntry(ctx *gin.Context) {
 
 	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
+	_, err := server.store.GetAccount(ctx, db.GetAccountParams{
+		ID:     req.AccountID,
+		UserID: payload.UserID,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, errResponse(err))
+		return
+	}
+
 	category, err := server.store.GetCategory(ctx, db.GetCategoryParams{
 		ID:     req.CategoryID,
 		UserID: payload.UserID,
@@ -72,6 +81,17 @@ func (server *Server) listEntries(ctx *gin.Context) {
 	var req listEntriesRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
+		return
+	}
+
+	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	_, err := server.store.GetAccount(ctx, db.GetAccountParams{
+		ID:     req.AccountID,
+		UserID: payload.UserID,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, errResponse(err))
 		return
 	}
 
