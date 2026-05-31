@@ -28,7 +28,8 @@ func NewServer(store db.Store, config utils.Config) (*Server, error) {
 		config:     config,
 	}
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
 
 	v1 := router.Group("/api/v1")
 
@@ -50,10 +51,6 @@ func NewServer(store db.Store, config utils.Config) (*Server, error) {
 
 	server.router = router
 	return server, nil
-}
-
-func (s *Server) Start(address string) error {
-	return s.router.Run(address)
 }
 
 func (s *Server) Router() *gin.Engine {

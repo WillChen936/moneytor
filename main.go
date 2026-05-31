@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -26,6 +27,9 @@ func main() {
 
 	if config.Env == "DEV" {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
 	}
 
 	ctx := context.Background()
