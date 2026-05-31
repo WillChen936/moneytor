@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"math"
 	mockdb "moneytor/database/mocks"
 	db "moneytor/database/sqlc"
@@ -47,7 +46,7 @@ func TestCreateAccount(t *testing.T) {
 					CurrencyID: account.CurrencyID,
 					Balance:    account.Balance,
 				}
-				mockStore.EXPECT().CreateAccount(gomock.Any(), eqCreateAccountParams(arg)).Times(1).Return(account, nil)
+				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Eq(arg)).Times(1).Return(account, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -103,7 +102,7 @@ func TestCreateAccount(t *testing.T) {
 					CurrencyID: math.MaxInt16,
 					Balance:    account.Balance,
 				}
-				mockStore.EXPECT().CreateAccount(gomock.Any(), eqCreateAccountParams(arg)).Times(1).Return(db.Account{}, db.ErrForeignKeyViolation)
+				mockStore.EXPECT().CreateAccount(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.Account{}, db.ErrForeignKeyViolation)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
@@ -289,26 +288,3 @@ func createRandomAccountForUser(userID int64) db.Account {
 	}
 }
 
-func eqCreateAccountParams(arg db.CreateAccountParams) gomock.Matcher {
-	return eqCreateAccountParamsMatcher{arg}
-}
-
-type eqCreateAccountParamsMatcher struct {
-	arg db.CreateAccountParams
-}
-
-func (e eqCreateAccountParamsMatcher) Matches(x any) bool {
-	arg, ok := x.(db.CreateAccountParams)
-	if !ok {
-		return false
-	}
-	return e.arg.UserID == arg.UserID &&
-		e.arg.Name == arg.Name &&
-		e.arg.CurrencyID == arg.CurrencyID &&
-		e.arg.Balance == arg.Balance
-}
-
-func (e eqCreateAccountParamsMatcher) String() string {
-	return fmt.Sprintf("is equal to CreateAccountParams{UserID=%d, Name=%s, CurrencyID=%d, Balance=%d}",
-		e.arg.UserID, e.arg.Name, e.arg.CurrencyID, e.arg.Balance)
-}

@@ -98,7 +98,7 @@ func resolverEntryAmount(transactionTypeID int16, rawAmount int64) (int64, error
 		return -1 * rawAmount, nil
 	case TransactionTypeIncome:
 		return 1 * rawAmount, nil
-default:
+	default:
 		return 0, fmt.Errorf("invalid transaction type: %d", transactionTypeID)
 	}
 }
