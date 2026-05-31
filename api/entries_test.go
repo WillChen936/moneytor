@@ -21,12 +21,12 @@ import (
 
 func TestCreateEntry(t *testing.T) {
 	userID := utils.RandomInt64Range(1, 1000)
-	account := createRandomAccountForUser(userID)
+	account := createRandomAccount(userID)
 	amount := int64(1000)
 
-	categoryIncome := createRandomCategoryForUser(userID)
+	categoryIncome := createRandomCategory(userID)
 	categoryIncome.TransactionTypeID = TransactionTypeIncome
-	categoryExpense := createRandomCategoryForUser(userID)
+	categoryExpense := createRandomCategory(userID)
 	categoryExpense.TransactionTypeID = TransactionTypeExpense
 
 	entryIncome := createRandomEntry(account.ID, categoryIncome.ID)
@@ -202,7 +202,7 @@ func TestCreateEntry(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				transferCategory := createRandomCategoryForUser(userID)
+				transferCategory := createRandomCategory(userID)
 				transferCategory.TransactionTypeID = TransactionTypeTransfer
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).
 					Times(1).Return(transferCategory, nil)

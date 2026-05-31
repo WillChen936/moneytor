@@ -20,7 +20,7 @@ import (
 
 func TestCreateAccount(t *testing.T) {
 	userID := utils.RandomInt64Range(1, 1000)
-	account := createRandomAccountForUser(userID)
+	account := createRandomAccount(userID)
 
 	testCases := []struct {
 		name          string
@@ -155,7 +155,7 @@ func TestListAccounts(t *testing.T) {
 	userID := utils.RandomInt64Range(1, 1000)
 	accounts := make([]db.Account, 10)
 	for i := range accounts {
-		accounts[i] = createRandomAccountForUser(userID)
+		accounts[i] = createRandomAccount(userID)
 	}
 
 	testCases := []struct {
@@ -278,7 +278,7 @@ func TestListAccounts(t *testing.T) {
 	}
 }
 
-func createRandomAccountForUser(userID int64) db.Account {
+func createRandomAccount(userID int64) db.Account {
 	return db.Account{
 		ID:         utils.RandomInt64Range(1, 1000),
 		UserID:     userID,

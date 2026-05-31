@@ -19,11 +19,11 @@ import (
 
 func TestCreateTransfer(t *testing.T) {
 	userID := utils.RandomInt64Range(1, 1000)
-	fromAccount := createRandomAccountForUser(userID)
-	toAccount := createRandomAccountForUser(userID)
+	fromAccount := createRandomAccount(userID)
+	toAccount := createRandomAccount(userID)
 	amount := int64(1000)
 
-	categoryTransfer := createRandomCategoryForUser(userID)
+	categoryTransfer := createRandomCategory(userID)
 	categoryTransfer.TransactionTypeID = TransactionTypeTransfer
 
 	testCases := []struct {
@@ -115,7 +115,7 @@ func TestCreateTransfer(t *testing.T) {
 				addAuthorization(t, request, server, authorizationTypeBearer, userID, time.Minute)
 			},
 			buildStub: func(mockStore *mockdb.MockStore) {
-				expenseCategory := createRandomCategoryForUser(userID)
+				expenseCategory := createRandomCategory(userID)
 				expenseCategory.TransactionTypeID = TransactionTypeExpense
 				mockStore.EXPECT().GetCategory(gomock.Any(), gomock.Any()).
 					Times(1).Return(expenseCategory, nil)

@@ -19,7 +19,7 @@ import (
 
 func TestCreateCategory(t *testing.T) {
 	userID := utils.RandomInt64Range(1, 1000)
-	category := createRandomCategoryForUser(userID)
+	category := createRandomCategory(userID)
 
 	testCases := []struct {
 		name          string
@@ -152,7 +152,7 @@ func TestListCategory(t *testing.T) {
 	userID := utils.RandomInt64Range(1, 1000)
 	categories := make([]db.Category, 10)
 	for i := range categories {
-		categories[i] = createRandomCategoryForUser(userID)
+		categories[i] = createRandomCategory(userID)
 	}
 
 	testCases := []struct {
@@ -275,7 +275,7 @@ func TestListCategory(t *testing.T) {
 	}
 }
 
-func createRandomCategoryForUser(userID int64) db.Category {
+func createRandomCategory(userID int64) db.Category {
 	return db.Category{
 		ID:                utils.RandomInt64Range(1, 1000),
 		UserID:            userID,
