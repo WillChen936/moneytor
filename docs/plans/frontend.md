@@ -97,3 +97,32 @@
 
 - 每個 Phase 只專注一個概念，完成並確認能跑起來再進下一個
 - 後端缺少的 API（Update / Delete / 統計）等前端做到需要時再補
+
+---
+
+## 上 Production 前要改進的事
+
+以下是學習階段為了簡化而暫時妥協、正式上線前需要補強的項目。
+
+### 認證安全性強化
+
+**現況（學習階段簡化版）：**
+- access token 直接存在 `localStorage`
+- 只用 access token，沒有實作 token 過期後自動 refresh
+- token 欄位用 `data.accessToken`（後端回傳在 response body）
+
+**問題：**
+- `localStorage` 可被 XSS 讀取，token 有被竊取風險
+- access token 過期後沒有 refresh 機制，使用者會突然被登出
+
+**要做：**
+- refresh token 改由後端用 HttpOnly Cookie 下發（JS 讀不到，較安全），需後端配合（見 backend plan）
+- access token 維持短命；可考慮放記憶體而非 localStorage
+- 在 `src/lib/api.ts` 的 interceptor 加上「access token 過期 → 自動用 refresh token 換新 token → 重送原請求」的邏輯
+- 後端已同時回傳 access / refresh token（`loginResponse`），基礎已具備
+
+### 開發環境的 CORS 取巧
+
+**現況：** dev 用 Vite proxy（`vite.config.ts` 的 `server.proxy`）讓前端同源打 `/api`，避開 CORS。
+
+**正式版：** 若前後端跨來源部署（不同網域/port），後端需正式設定 CORS 允許清單（即本 session 移除的 `corsMiddleware`）；若同源部署（後端服務靜態檔或反向代理）則不需要。
